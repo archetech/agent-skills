@@ -1,26 +1,20 @@
 #!/bin/bash
-# Decrypt an encrypted file
-# Usage: ./decrypt-file.sh <encrypted-file> <output-file>
+# Decrypt an encrypted DID to a file
+# Usage: ./decrypt-file.sh <encrypted-did> <output-file>
 
 set -e
 
 if [ $# -lt 2 ]; then
-    echo "Usage: $0 <encrypted-file> <output-file>"
+    echo "Usage: $0 <encrypted-did> <output-file>"
     echo ""
     echo "Examples:"
-    echo "  $0 encrypted.json secret.pdf"
-    echo "  $0 secure.json document.txt"
+    echo "  $0 did:cid:bagaaiera... secret.pdf"
+    echo "  $0 did:cid:bagaaiera... document.txt"
     exit 1
 fi
 
-ENCRYPTED_FILE="$1"
+ENCRYPTED_DID="$1"
 OUTPUT_FILE="$2"
-
-# Check encrypted file exists
-if [ ! -f "$ENCRYPTED_FILE" ]; then
-    echo "ERROR: Encrypted file not found: $ENCRYPTED_FILE"
-    exit 1
-fi
 
 # Load environment
 if [ -f ~/.archon.env ]; then
@@ -30,16 +24,21 @@ else
     exit 1
 fi
 
-echo "Decrypting: $ENCRYPTED_FILE"
+echo "Decrypting: $ENCRYPTED_DID"
 echo "Output: $OUTPUT_FILE"
 echo ""
 
-# Decrypt (decrypt-json writes to stdout, we redirect to file)
+# Decrypt (outputs to stdout, we redirect)
 cd ~/clawd
-npx @didcid/keymaster decrypt-json "$(cat $ENCRYPTED_FILE)" > "$OUTPUT_FILE"
-
-FILE_SIZE=$(du -h "$OUTPUT_FILE" | cut -f1)
-
-echo "✓ File decrypted"
-echo ""
-echo "Decrypted file: $OUTPUT_FILE ($FILE_SIZE)"
+if npx @didcid/keymaster decrypt-did "$ENCRYPTED_DID" > "$OUTPUT_FILE" 2>&1; then
+    FILE_SIZE=$(du -h "$OUTPUT_FILE" | cut -f1)
+    
+    echo "✓ File decrypted"
+    echo ""
+    echo "Decrypted file: $OUTPUT_FILE ($FILE_SIZE)"
+else
+    echo "✗ Decryption failed"
+    echo "Either the DID was not encrypted for you, or an error occurred."
+    rm -f "$OUTPUT_FILE"
+    exit 1
+fi

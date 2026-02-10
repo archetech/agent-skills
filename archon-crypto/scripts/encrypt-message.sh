@@ -25,15 +25,20 @@ else
     exit 1
 fi
 
-# Resolve recipient name to DID if needed
+# Resolve recipient name to DID if needed (suppress verbose output)
 cd ~/clawd
-RECIPIENT_DID=$(npx @didcid/keymaster resolve-did "$RECIPIENT" 2>/dev/null || echo "$RECIPIENT")
+RECIPIENT_DID=$(npx @didcid/keymaster resolve-did "$RECIPIENT" 2>/dev/null | head -1 || echo "$RECIPIENT")
+
+# If resolution gave us JSON, just use the original input
+if [[ "$RECIPIENT_DID" == "{"* ]]; then
+    RECIPIENT_DID="$RECIPIENT"
+fi
 
 echo "Encrypting message for: $RECIPIENT_DID"
 echo ""
 
 # Encrypt message
-ENCRYPTED_DID=$(npx @didcid/keymaster encrypt-message "$MESSAGE" "$RECIPIENT_DID")
+ENCRYPTED_DID=$(npx @didcid/keymaster encrypt-message "$MESSAGE" "$RECIPIENT_DID" 2>/dev/null | head -1)
 
 echo "✓ Message encrypted"
 echo ""

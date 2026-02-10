@@ -36,7 +36,7 @@ Provides cryptographic operations using Archon DIDs:
 
 **Document Signing:**
 ```bash
-# Sign a document
+# Sign a document (modifies in place)
 ./sign-file.sh contract.json
 # Others verify your signature
 ./verify-file.sh contract.json
@@ -44,7 +44,7 @@ Provides cryptographic operations using Archon DIDs:
 
 **Code/Release Signing:**
 ```bash
-# Sign manifest of repository/release
+# Sign manifest of repository/release (modifies in place)
 ./sign-file.sh manifest.json
 # Users verify it came from you
 ./verify-file.sh manifest.json
@@ -68,19 +68,16 @@ Output: Encrypted DID (starts with `did:cid:`) that only alice can decrypt.
 ### Encrypt a File
 
 ```bash
-./encrypt-file.sh <input-file> <recipient-name-or-did> [output-file]
+./encrypt-file.sh <input-file> <recipient-name-or-did>
 ```
 
 Examples:
 ```bash
-# Encrypt for alice, auto-generate output filename
 ./encrypt-file.sh secret.pdf alice
-
-# Specify output filename
-./encrypt-file.sh secret.pdf alice encrypted.json
+./encrypt-file.sh document.txt bob
 ```
 
-Output: JSON file containing encrypted data. Only the recipient can decrypt.
+**Output:** An encrypted DID (like `did:cid:bagaaiera...`). The encrypted content is stored on-chain/IPFS and referenced by this DID. Only the recipient can decrypt it.
 
 ## Decryption
 
@@ -100,15 +97,15 @@ Output: Original plaintext message (if encrypted for you).
 ### Decrypt a File
 
 ```bash
-./decrypt-file.sh <encrypted-file> <output-file>
+./decrypt-file.sh <encrypted-did> <output-file>
 ```
 
 Example:
 ```bash
-./decrypt-file.sh encrypted.json decrypted.pdf
+./decrypt-file.sh did:cid:bagaaiera... decrypted.pdf
 ```
 
-Output: Original file restored (if encrypted for you).
+**Output:** Original file restored from on-chain/IPFS storage (if encrypted for you).
 
 ## Digital Signatures
 
@@ -207,31 +204,36 @@ Sign release manifests, skill packages, or any JSON configuration:
 ./sign-file.sh skill-manifest.json
 ```
 
-## File Format Details
+## How Encryption Works
 
-**Encrypted Files:**
-JSON format with encrypted payload:
-```json
-{
-  "@context": "https://w3id.org/security/v2",
-  "type": "EncryptedMessage",
-  "recipient": "did:cid:bagaaiera...",
-  "ciphertext": "...",
-  "nonce": "...",
-  "ephemeralPublicKey": "..."
-}
+**Encrypted content returns a DID:**
+When you encrypt a file or message, Keymaster:
+1. Encrypts the content with the recipient's public key
+2. Stores the encrypted data on-chain/IPFS
+3. Returns a DID that references this encrypted data
+
+**Example:**
+```bash
+./encrypt-file.sh secret.pdf alice
+# Returns: did:cid:bagaaierawxxpo4tuo4ephexi2a2zbvj...
 ```
 
-**Signed Files:**
-Original JSON with added `proof` section:
+The recipient uses this DID to decrypt:
+```bash
+./decrypt-file.sh did:cid:bagaaierawxxpo4... decrypted.pdf
+```
+
+**Signed files:**
+Signing adds a `proof` section to your JSON:
 ```json
 {
-  "data": { ... },
+  "data": { "your": "content" },
   "proof": {
     "type": "EcdsaSecp256k1Signature2019",
-    "created": "2026-02-10T19:30:00Z",
+    "created": "2026-02-10T20:41:26.323Z",
     "verificationMethod": "did:cid:bagaaiera...#key-1",
-    "proofValue": "z..."
+    "proofPurpose": "assertionMethod",
+    "proofValue": "wju2GCn0QweP4bH6..."
   }
 }
 ```

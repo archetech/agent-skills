@@ -1,5 +1,5 @@
 #!/bin/bash
-# Sign a JSON file with your DID
+# Sign a JSON file with your DID (modifies file in place)
 # Usage: ./sign-file.sh <file>
 
 set -e
@@ -11,7 +11,7 @@ if [ $# -lt 1 ]; then
     echo "  $0 manifest.json"
     echo "  $0 contract.json"
     echo ""
-    echo "Note: File must be valid JSON. The signature (proof) is added to the file."
+    echo "Note: File must be valid JSON. Signature is added in place."
     exit 1
 fi
 
@@ -40,26 +40,20 @@ fi
 echo "Signing: $FILE"
 echo ""
 
-# Create backup
-BACKUP_FILE="${FILE}.backup"
-cp "$FILE" "$BACKUP_FILE"
+# Create temp file for safety
+TEMP_FILE="${FILE}.signing.tmp"
 
-# Sign file (modifies in place)
+# Sign file (outputs to stdout)
 cd ~/clawd
-if npx @didcid/keymaster sign-file "$FILE" > /dev/null 2>&1; then
-    echo "✓ File signed"
-    echo ""
-    echo "Signature added to: $FILE"
-    echo "Backup saved to: $BACKUP_FILE"
+if npx @didcid/keymaster sign-file "$FILE" > "$TEMP_FILE" 2>&1; then
+    # Replace original with signed version
+    mv "$TEMP_FILE" "$FILE"
+    echo "✓ File signed (signature added in place)"
     echo ""
     echo "Others can verify with:"
     echo "  ./verify-file.sh $FILE"
-    
-    # Clean up backup if signing succeeded
-    rm "$BACKUP_FILE"
 else
     echo "✗ Signing failed"
-    echo "Original file preserved at: $BACKUP_FILE"
-    mv "$BACKUP_FILE" "$FILE"
+    rm -f "$TEMP_FILE"
     exit 1
 fi

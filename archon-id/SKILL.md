@@ -12,7 +12,9 @@ Manages your Archon decentralized identities (DIDs):
 ## Prerequisites
 
 - Node.js installed (for `npx @didcid/keymaster`)
-- Archon Gatekeeper access (public: `https://archon.technology` or local: `http://localhost:4224`)
+- Internet connection (uses public Archon gatekeeper at `https://archon.technology`)
+
+**Optional:** Run local Archon node for offline operations or custom configuration
 
 ## Initial Setup
 

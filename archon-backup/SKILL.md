@@ -26,10 +26,16 @@ Your backups are:
 
 ### Gatekeeper Options
 
-- **Public** (`https://archon.technology`) - 10MB file size limit, suitable for most agents
-- **Local** (`http://localhost:4224`) - Unlimited size, for large archives (>10MB)
+Skills default to the **public gatekeeper** (`https://archon.technology`):
+- **Pros:** No local setup required, works immediately
+- **Cons:** 10MB file size limit per item
 
-If your backups exceed 10MB, run a local Archon node (docs coming soon).
+For backups larger than 10MB, run a **local Archon node**:
+1. Install Archon locally: https://github.com/archetech/archon
+2. Update `~/.archon.env`:
+   ```bash
+   export ARCHON_GATEKEEPER_URL="http://localhost:4224"  # Unlimited size
+   ```
 
 ## Setup
 

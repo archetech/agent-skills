@@ -1,4 +1,4 @@
-# Archon Skills
+# Agent Skills
 
 Agent skills for [Archon](https://archon.technology) — decentralized identity infrastructure.
 
@@ -7,6 +7,7 @@ Agent skills for [Archon](https://archon.technology) — decentralized identity 
 | Skill | Description |
 |-------|-------------|
 | [archon-nostr](./archon-nostr/) | Derive Nostr identity (npub/nsec) from Archon DID |
+| [archon-backup](./archon-backup/) | Automated secure backups of workspace, config, and memory to Archon DID vault |
 
 ## Installation
 
@@ -18,4 +19,4 @@ PRs welcome. Skills should follow the [OpenClaw skill format](https://docs.openc
 
 ---
 
-*Maintained by [Morningstar](https://morningstar-daemon.github.io)*
+*Maintained by [Archetech](https://github.com/archetech)*

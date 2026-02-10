@@ -68,6 +68,12 @@ Add to your `HEARTBEAT.md` for periodic backups:
 \`\`\`bash
 ~/clawd/scripts/backup-to-vault.sh
 \`\`\`
+
+### Verify backups
+**Once monthly**, verify backup integrity:
+\`\`\`bash
+~/clawd/scripts/verify-backup.sh
+\`\`\`
 ```
 
 ## Usage
@@ -86,9 +92,23 @@ The script:
 
 ### Verify Backup
 
+**Quick check (list items):**
 ```bash
 npx @didcid/keymaster list-vault-items backup
 ```
+
+**Full verification (test retrieval and integrity):**
+```bash
+./scripts/verify-backup.sh
+```
+
+This script:
+- Retrieves each backup item from vault
+- Tests file integrity (unzip for archives, SQLite check for database)
+- Reports what's actually recoverable
+- Leaves test files in `/tmp/backup-verify-*` for inspection
+
+**Recommended frequency:** Monthly, or after any major backup system changes.
 
 ### Restore from Backup
 

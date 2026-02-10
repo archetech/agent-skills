@@ -13,8 +13,9 @@ else
     exit 1
 fi
 
-# Use local Gatekeeper (unlimited size)
-export ARCHON_GATEKEEPER_URL="http://localhost:4224"
+# Use public Gatekeeper by default (10MB limit)
+# Override with local if needed: export ARCHON_GATEKEEPER_URL="http://localhost:4224"
+export ARCHON_GATEKEEPER_URL="${ARCHON_GATEKEEPER_URL:-https://archon.technology}"
 
 # Ensure Keymaster always uses the correct wallet regardless of cwd
 export KEYMASTER_WALLET="$HOME/clawd/wallet.json"

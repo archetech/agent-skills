@@ -39,7 +39,8 @@ cat > ~/.archon.env << EOF
 # Archon passphrase - keeps your wallet encrypted
 # DO NOT COMMIT THIS FILE TO GIT
 export ARCHON_PASSPHRASE="$PASSPHRASE"
-export ARCHON_GATEKEEPER_URL="http://localhost:4224"  # or https://archon.technology
+export ARCHON_GATEKEEPER_URL="https://archon.technology"  # Public gatekeeper (10MB limit)
+# For local gatekeeper (unlimited): export ARCHON_GATEKEEPER_URL="http://localhost:4224"
 export KEYMASTER_WALLET="$HOME/clawd/wallet.json"
 EOF
 

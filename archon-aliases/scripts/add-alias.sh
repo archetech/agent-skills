@@ -1,11 +1,11 @@
 #!/bin/bash
-# Add a friendly name for a DID
-# Usage: ./add-name.sh <name> <did>
+# Add a friendly alias for a DID
+# Usage: ./add-alias.sh <alias> <did>
 
 set -e
 
 if [ $# -lt 2 ]; then
-    echo "Usage: $0 <name> <did>"
+    echo "Usage: $0 <alias> <did>"
     echo ""
     echo "Examples:"
     echo "  $0 alice did:cid:bagaaiera..."
@@ -14,7 +14,7 @@ if [ $# -lt 2 ]; then
     exit 1
 fi
 
-NAME="$1"
+ALIAS="$1"
 DID="$2"
 
 # Load environment
@@ -26,11 +26,11 @@ else
     exit 1
 fi
 
-# Add name
+# Add alias
 cd ~/clawd
-npx @didcid/keymaster add-name "$NAME" "$DID"
+npx @didcid/keymaster add-alias "$ALIAS" "$DID"
 
 echo ""
-echo "✓ Name '$NAME' added for DID: $DID"
+echo "✓ Alias '$ALIAS' added for DID: $DID"
 echo ""
-echo "You can now use '$NAME' in place of the full DID in Keymaster commands."
+echo "You can now use '$ALIAS' in place of the full DID in Keymaster commands."

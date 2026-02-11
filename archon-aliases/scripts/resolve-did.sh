@@ -1,11 +1,11 @@
 #!/bin/bash
-# Resolve a name to its DID (or pass through a DID unchanged)
-# Usage: ./resolve-did.sh <name-or-did>
+# Resolve an alias to its DID (or pass through a DID unchanged)
+# Usage: ./resolve-did.sh <alias-or-did>
 
 set -e
 
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <name-or-did>"
+    echo "Usage: $0 <alias-or-did>"
     echo ""
     echo "Examples:"
     echo "  $0 alice"
@@ -13,7 +13,7 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
-NAME_OR_DID="$1"
+ALIAS_OR_DID="$1"
 
 # Load environment
 if [ -f ~/.archon.env ]; then
@@ -23,6 +23,6 @@ else
     exit 1
 fi
 
-# Resolve (works with both names and DIDs)
+# Resolve (works with both aliases and DIDs)
 cd ~/clawd
-npx @didcid/keymaster resolve-did "$NAME_OR_DID"
+npx @didcid/keymaster resolve-did "$ALIAS_OR_DID"

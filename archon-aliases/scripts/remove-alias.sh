@@ -1,11 +1,11 @@
 #!/bin/bash
-# Remove a name mapping
-# Usage: ./remove-name.sh <name>
+# Remove an alias mapping
+# Usage: ./remove-alias.sh <alias>
 
 set -e
 
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <name>"
+    echo "Usage: $0 <alias>"
     echo ""
     echo "Examples:"
     echo "  $0 alice"
@@ -13,7 +13,7 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
-NAME="$1"
+ALIAS="$1"
 
 # Load environment
 if [ -f ~/.archon.env ]; then
@@ -23,9 +23,9 @@ else
     exit 1
 fi
 
-# Remove name
+# Remove alias
 cd ~/clawd
-npx @didcid/keymaster remove-name "$NAME"
+npx @didcid/keymaster remove-alias "$ALIAS"
 
 echo ""
-echo "✓ Name '$NAME' removed"
+echo "✓ Alias '$ALIAS' removed"

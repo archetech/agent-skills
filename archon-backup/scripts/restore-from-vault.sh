@@ -1,6 +1,11 @@
 #!/bin/bash
 # Restore workspace, config, and hexmem from DID vault backup
 # Usage: restore-from-vault.sh [target-dir]
+#
+# If starting from scratch with only a mnemonic:
+#   npx @didcid/keymaster import-wallet "word1 word2 ... word12"
+#   npx @didcid/keymaster recover-wallet-did
+#   ./scripts/restore-from-vault.sh
 
 set -e
 
@@ -12,19 +17,36 @@ fi
 TARGET_DIR="${1:-.}"
 
 echo "=== Archon Backup Restore ==="
-echo "Target directory: $TARGET_DIR"
 echo ""
 
-# Check for vault alias
-if ! npx @didcid/keymaster get-alias backup >/dev/null 2>&1; then
-    echo "Error: 'backup' vault alias not found."
-    echo "Set it with: npx @didcid/keymaster add-alias backup <vault-did>"
+# Check if wallet exists
+if ! npx @didcid/keymaster show-wallet >/dev/null 2>&1; then
+    echo "No wallet found. To restore from mnemonic:"
+    echo ""
+    echo "  npx @didcid/keymaster import-wallet \"word1 word2 ... word12\""
+    echo "  npx @didcid/keymaster recover-wallet-did"
+    echo "  ./scripts/restore-from-vault.sh"
+    echo ""
     exit 1
 fi
 
+# Check for vault alias
+if ! npx @didcid/keymaster get-alias backup >/dev/null 2>&1; then
+    echo "Error: 'backup' vault alias not found in wallet."
+    echo ""
+    echo "If you restored from mnemonic, run:"
+    echo "  npx @didcid/keymaster recover-wallet-did"
+    echo ""
+    echo "This retrieves your wallet data (including aliases) from the seed bank."
+    exit 1
+fi
+
+echo "Target directory: $TARGET_DIR"
+echo ""
+
 # List available backups
 echo "Available backups in vault:"
-npx @didcid/keymaster list-vault-items backup 2>/dev/null | jq -r 'to_entries[] | "  \(.key) - \(.value.updated // .value.created)"'
+npx @didcid/keymaster list-vault-items backup 2>/dev/null | jq -r 'to_entries[] | "  \(.key)"' || echo "  (none)"
 echo ""
 
 # Create restore directory

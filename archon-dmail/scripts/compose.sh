@@ -1,6 +1,6 @@
 #!/bin/bash
-# Compose a dmail (create without sending)
-# Usage: compose.sh <recipient-did> <subject> <body> [cc-did...]
+# Compose a dmail from JSON (create without sending)
+# Usage: compose.sh <json-file>
 # Then use attach.sh to add files, and send-composed.sh to send
 
 set -e
@@ -11,42 +11,57 @@ if [ -f ~/.archon.env ]; then
 fi
 export ARCHON_WALLET_PATH="${ARCHON_WALLET_PATH:-$HOME/clawd/wallet.json}"
 
-if [ $# -lt 3 ]; then
-    echo "Usage: $0 <recipient-did> <subject> <body> [cc-did...]"
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 <json-file>"
+    echo ""
+    echo "JSON format:"
+    echo '{'
+    echo '    "to": ["did:cid:recipient1", "did:cid:recipient2"],'
+    echo '    "cc": ["did:cid:cc-recipient"],'
+    echo '    "subject": "Subject line",'
+    echo '    "body": "Message body",'
+    echo '    "reference": ""'
+    echo '}'
     echo ""
     echo "Creates a dmail without sending. Use attach.sh to add files,"
     echo "then send-composed.sh to send."
     exit 1
 fi
 
-RECIPIENT="$1"
-SUBJECT="$2"
-BODY="$3"
-shift 3
+JSON_FILE="$1"
 
-# Build CC array from remaining arguments
-CC_JSON="[]"
-if [ $# -gt 0 ]; then
-    CC_JSON=$(printf '%s\n' "$@" | jq -R . | jq -s .)
+if [ ! -f "$JSON_FILE" ]; then
+    echo "Error: File not found: $JSON_FILE"
+    exit 1
 fi
 
-# Escape subject and body for JSON
-SUBJECT_ESCAPED=$(echo "$SUBJECT" | jq -Rs . | sed 's/^"//;s/"$//')
-BODY_ESCAPED=$(echo "$BODY" | jq -Rs .)
+# Validate JSON has required fields
+if ! jq -e '.to | length > 0' "$JSON_FILE" >/dev/null 2>&1; then
+    echo "Error: JSON must have at least one recipient in 'to' array"
+    exit 1
+fi
 
-# Create temporary JSON file
+if ! jq -e '.subject' "$JSON_FILE" >/dev/null 2>&1; then
+    echo "Error: JSON must have 'subject' field"
+    exit 1
+fi
+
+if ! jq -e '.body' "$JSON_FILE" >/dev/null 2>&1; then
+    echo "Error: JSON must have 'body' field"
+    exit 1
+fi
+
+# Ensure optional fields exist (add defaults if missing)
 TMPFILE=$(mktemp /tmp/dmail-XXXXXX.json)
 trap "rm -f $TMPFILE" EXIT
 
-cat > "$TMPFILE" << EOF
-{
-    "to": ["$RECIPIENT"],
-    "cc": $CC_JSON,
-    "subject": "$SUBJECT_ESCAPED",
-    "body": $BODY_ESCAPED,
-    "reference": ""
-}
-EOF
+jq '{
+    to: .to,
+    cc: (.cc // []),
+    subject: .subject,
+    body: .body,
+    reference: (.reference // "")
+}' "$JSON_FILE" > "$TMPFILE"
 
 # Create the dmail (but don't send)
 DMAIL_DID=$(npx @didcid/keymaster create-dmail "$TMPFILE")

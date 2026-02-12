@@ -22,8 +22,9 @@ export ARCHON_WALLET_PATH="${ARCHON_WALLET_PATH:-$HOME/clawd/wallet.json}"
 # Send a simple message
 ./scripts/send.sh "did:cid:recipient..." "Subject line" "Message body"
 
-# Or compose with attachments
-./scripts/compose.sh "did:cid:recipient..." "Subject" "Body"  # Returns dmail DID
+# Or compose with attachments (JSON input for multiple recipients)
+echo '{"to":["did:cid:..."],"subject":"Report","body":"See attached"}' > msg.json
+./scripts/compose.sh msg.json                    # Returns dmail DID
 ./scripts/attach.sh <dmail-did> document.pdf
 ./scripts/send-composed.sh <dmail-did>
 
@@ -59,21 +60,43 @@ Creates and sends an encrypted message in one step. Returns the dmail DID.
 ### compose.sh - Create Draft (for attachments)
 
 ```bash
-./scripts/compose.sh <recipient-did> <subject> <body> [cc-did...]
+./scripts/compose.sh <json-file>
 ```
 
-Creates a dmail without sending it. Use this when you need to add attachments before sending.
+Creates a dmail from a JSON file without sending it. Use this when you need multiple recipients or attachments.
+
+**JSON format:**
+```json
+{
+    "to": ["did:cid:alice", "did:cid:bob"],
+    "cc": ["did:cid:charlie"],
+    "subject": "Subject line",
+    "body": "Message body",
+    "reference": ""
+}
+```
 
 **Workflow:**
 ```bash
-# 1. Create the draft
-DMAIL=$(./scripts/compose.sh "did:cid:alice..." "Report" "See attached")
+# 1. Create message JSON
+cat > message.json << 'EOF'
+{
+    "to": ["did:cid:alice...", "did:cid:bob..."],
+    "cc": [],
+    "subject": "Q4 Report",
+    "body": "Please review the attached report.",
+    "reference": ""
+}
+EOF
 
-# 2. Add attachments
+# 2. Create the draft
+DMAIL=$(./scripts/compose.sh message.json | grep "Created draft:" | cut -d' ' -f3)
+
+# 3. Add attachments
 ./scripts/attach.sh "$DMAIL" report.pdf
 ./scripts/attach.sh "$DMAIL" data.csv
 
-# 3. Send when ready
+# 4. Send when ready
 ./scripts/send-composed.sh "$DMAIL"
 ```
 

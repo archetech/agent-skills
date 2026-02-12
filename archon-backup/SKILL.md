@@ -146,17 +146,22 @@ unzip config.zip -d ~/.openclaw
 If you've lost everything and only have your 12-word mnemonic:
 
 ```bash
-# 1. Restore wallet from mnemonic
-npx @didcid/keymaster import-wallet "word1 word2 ... word12"
-
-# 2. Recover wallet data from seed bank (includes all aliases)
-npx @didcid/keymaster recover-wallet-did
-
-# 3. Run restore script - wallet now has "backup" alias
-./scripts/restore-from-vault.sh
+./scripts/disaster-recovery.sh "word1 word2 ... word12" [target-dir]
 ```
 
+This single command:
+1. Creates wallet from mnemonic
+2. Recovers wallet data (identities, aliases) from seed bank
+3. Restores workspace, config, and memory from vault
+
 The seed bank stores an encrypted copy of your wallet (including the backup vault alias), so you can recover everything from just the mnemonic.
+
+**Manual steps (if preferred):**
+```bash
+npx @didcid/keymaster import-wallet "word1 word2 ... word12"
+npx @didcid/keymaster recover-wallet-did
+./scripts/restore-from-vault.sh
+```
 
 ## Backup Contents
 

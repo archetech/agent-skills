@@ -8,7 +8,7 @@ if [ -z "$1" ]; then
     echo "Usage: $0 <did-name>"
     echo ""
     echo "Available DIDs:"
-    ./scripts/list-ids.sh
+    "$(dirname "$0")/list-ids.sh"
     exit 1
 fi
 

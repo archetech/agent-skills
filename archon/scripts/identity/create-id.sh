@@ -12,7 +12,7 @@ if [ -f ~/clawd/wallet.json ]; then
     echo "ERROR: Wallet already exists at ~/clawd/wallet.json"
     echo ""
     echo "If you want to create a new identity in your existing wallet, use:"
-    echo "  ./scripts/create-additional-id.sh <did-name>"
+    echo "  ./scripts/identity/create-additional-id.sh <did-name>"
     echo ""
     echo "If you want to start over (WARNING: will lose existing DIDs), remove:"
     echo "  rm ~/clawd/wallet.json ~/.archon.env"

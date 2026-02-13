@@ -8,7 +8,7 @@ if [ -f ~/.archon.env ]; then
     source ~/.archon.env
 else
     echo "ERROR: ~/.archon.env not found"
-    echo "Run ./scripts/create-id.sh first"
+    echo "Run ./scripts/identity/create-id.sh first"
     exit 1
 fi
 
@@ -26,4 +26,4 @@ npx @didcid/keymaster list-dids
 
 echo ""
 echo "Switch active DID:"
-echo "  ./scripts/switch-id.sh <did-name>"
+echo "  ./scripts/identity/switch-id.sh <did-name>"

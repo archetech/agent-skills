@@ -21,7 +21,7 @@ if [ ! -f ~/clawd/wallet.json ]; then
     echo "ERROR: No wallet found at ~/clawd/wallet.json"
     echo ""
     echo "Create your first identity with:"
-    echo "  ./scripts/create-id.sh"
+    echo "  ./scripts/identity/create-id.sh"
     exit 1
 fi
 
@@ -31,7 +31,7 @@ if [ -f ~/.archon.env ]; then
 else
     echo "ERROR: ~/.archon.env not found"
     echo ""
-    echo "Run ./scripts/create-id.sh first to set up your environment"
+    echo "Run ./scripts/identity/create-id.sh first to set up your environment"
     exit 1
 fi
 
@@ -48,7 +48,7 @@ echo ""
 echo "✓ DID '$DID_NAME' created"
 echo ""
 echo "List all DIDs:"
-echo "  ./scripts/list-ids.sh"
+echo "  ./scripts/identity/list-ids.sh"
 echo ""
 echo "Switch to this DID:"
-echo "  ./scripts/switch-id.sh $DID_NAME"
+echo "  ./scripts/identity/switch-id.sh $DID_NAME"

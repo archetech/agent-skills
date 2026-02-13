@@ -6,7 +6,7 @@ Agent skills for [Archon](https://archon.technology) — decentralized identity 
 
 | Skill | Description |
 |-------|-------------|
-| [archon](./archon/) | Complete Archon DID toolkit - identity management, encrypted messaging (dmail), Nostr integration, file encryption/signing, aliasing, and vault backups |
+| [archon-keymaster](./archon-keymaster/) | Complete Archon DID toolkit - identity management, encrypted messaging (dmail), Nostr integration, file encryption/signing, aliasing, and vault backups |
 
 ## Installation
 

@@ -1,9 +1,9 @@
 ---
-name: archon
+name: archon-keymaster
 description: Complete Archon DID toolkit - identity management, encrypted messaging (dmail), Nostr integration, file encryption/signing, aliasing, and vault backups. Use for any Archon/DID operations including creating identities, sending encrypted messages between DIDs, deriving Nostr keypairs from DID, encrypting/signing files, managing DID aliases, or backing up to distributed vaults.
 ---
 
-# Archon - Complete DID Toolkit
+# Archon Keymaster - Complete DID Toolkit
 
 Comprehensive toolkit for Archon decentralized identities (DIDs). Manages identity lifecycle, encrypted communication, cryptographic operations, and secure backups.
 

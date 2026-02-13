@@ -272,6 +272,14 @@ npx @didcid/keymaster list-vault-items backup
 
 ### Restore from Backup
 
+**Automated restore (recommended):**
+```bash
+./scripts/backup/restore-from-vault.sh [target-dir]
+```
+
+Retrieves and extracts all backup items (workspace.zip, config.zip, hexmem.db) from your vault.
+
+**Manual restore:**
 ```bash
 npx @didcid/keymaster get-vault-item backup workspace.zip workspace.zip
 npx @didcid/keymaster get-vault-item backup config.zip config.zip
@@ -280,6 +288,21 @@ npx @didcid/keymaster get-vault-item backup hexmem.db hexmem.db
 unzip workspace.zip
 unzip config.zip -d ~/.openclaw
 ```
+
+### Complete Disaster Recovery
+
+If you've lost everything but have your 12-word mnemonic:
+
+```bash
+./scripts/backup/disaster-recovery.sh "word1 word2 ... word12" [target-dir]
+```
+
+This single command:
+1. Creates wallet from mnemonic
+2. Recovers wallet data (identities, aliases) from seed bank
+3. Restores workspace, config, and memory from vault
+
+Requires `ARCHON_PASSPHRASE` to be set.
 
 ### Gatekeeper Options
 

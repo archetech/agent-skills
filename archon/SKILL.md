@@ -66,19 +66,19 @@ Create pseudonymous personas or role-separated identities (all share same mnemon
 
 ### Recovery
 
-**Complete disaster recovery (automated):**
+**Complete disaster recovery:**
 ```bash
 ./scripts/backup/disaster-recovery.sh "word1 word2 ... word12" [target-dir]
 ```
 
-Single command recovery from just your 12-word mnemonic. Imports wallet, recovers from seed bank, and restores all backups from vault.
+Recovers everything from just your 12-word mnemonic.
 
-**Manual recovery (step-by-step):**
+**Restore from existing wallet:**
 ```bash
-npx @didcid/keymaster import-wallet "word1 word2 ... word12"
-npx @didcid/keymaster recover-wallet-did
-./scripts/backup/restore-from-vault.sh
+./scripts/backup/restore-from-vault.sh [target-dir]
 ```
+
+If you already have your wallet, use this to restore workspace/config/memory from vault backups.
 
 ## Encrypted Messaging (Dmail)
 

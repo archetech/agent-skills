@@ -1,0 +1,19 @@
+# OpenClaw config backup ignore patterns
+# Place this file as .backup-ignore in ~/.openclaw/
+
+# Session data (large, regenerable)
+agents/*/sessions/*
+agents/*/cache/*
+
+# Logs
+logs/*
+*.log
+
+# Browser data (contains sockets, regenerable)
+browser/*
+media/*
+canvas/*
+
+# Temporary files
+*.tmp
+*.swp

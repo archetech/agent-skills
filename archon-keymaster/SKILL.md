@@ -1,6 +1,6 @@
 ---
 name: archon-keymaster
-description: Complete Archon DID toolkit - identity management, verifiable credentials, encrypted messaging (dmail), Nostr integration, file encryption/signing, aliasing, and vault backups. Use for any Archon/DID operations including creating identities, issuing/accepting verifiable credentials, sending encrypted messages between DIDs, deriving Nostr keypairs from DID, encrypting/signing files, managing DID aliases, or backing up to distributed vaults.
+description: Complete Archon DID toolkit - identity management, verifiable credentials, encrypted messaging (dmail), Nostr integration, file encryption/signing, aliasing, vault management, and encrypted backups. Use for any Archon/DID operations including creating identities, issuing/accepting verifiable credentials, sending encrypted messages between DIDs, deriving Nostr keypairs from DID, encrypting/signing files, managing DID aliases, creating/managing vaults, sharing vaults with multiple DIDs, or backing up to distributed vaults.
 ---
 
 # Archon Keymaster - Complete DID Toolkit
@@ -16,6 +16,7 @@ Comprehensive toolkit for Archon decentralized identities (DIDs). Manages identi
 - **File Encryption** - Encrypt files for specific DIDs
 - **Digital Signatures** - Sign and verify files with your DID
 - **DID Aliasing** - Friendly names for DIDs (contacts, schemas, credentials, vaults)
+- **Vault Management** - Create vaults, add/remove items, manage multi-party access
 - **Vault Backups** - Encrypted, distributed backups of workspace/config/memory
 
 ## Prerequisites
@@ -430,6 +431,133 @@ Pass-through safe (returns DID unchanged if you pass a DID).
 ```
 
 **Note:** Aliases work in most Keymaster commands and all encryption/messaging scripts.
+
+## Vault Management
+
+Low-level vault operations for managing encrypted distributed storage.
+
+### Create Vault
+
+```bash
+./scripts/vaults/create-vault.sh [-a|--alias <vault-alias>] [-s|--secret-members]
+```
+
+Creates a new vault and returns its DID. Optionally assign a local alias for easier reference.
+
+**Options:**
+- `-a, --alias` - Local alias for the vault DID
+- `-s, --secret-members` - Keep member list secret from each other
+
+**Examples:**
+```bash
+# Create vault with alias
+./scripts/vaults/create-vault.sh --alias my-vault
+
+# Create vault without alias (returns DID)
+./scripts/vaults/create-vault.sh
+
+# Create secret vault (members don't see each other)
+./scripts/vaults/create-vault.sh --alias secret-vault --secret-members
+```
+
+### Add Vault Item
+
+```bash
+./scripts/vaults/add-vault-item.sh <vault-id> <file-path>
+```
+
+Add a file to the vault. The file is encrypted and distributed across the Archon network.
+
+**Example:**
+```bash
+./scripts/vaults/add-vault-item.sh my-vault /path/to/document.pdf
+./scripts/vaults/add-vault-item.sh backup workspace.zip
+```
+
+### List Vault Items
+
+```bash
+./scripts/vaults/list-vault-items.sh <vault-id>
+```
+
+List all items stored in a vault with metadata (CID, size, type, date added).
+
+**Example output:**
+```json
+{
+  "document.pdf": {
+    "cid": "bafybei...",
+    "sha256": "33461e29...",
+    "bytes": 1234567,
+    "type": "application/pdf",
+    "added": "2026-02-15T11:00:34.505Z"
+  }
+}
+```
+
+### Get Vault Item
+
+```bash
+./scripts/vaults/get-vault-item.sh <vault-id> <item-name> <output-file>
+```
+
+Retrieve an item from the vault and save to a file.
+
+**Example:**
+```bash
+./scripts/vaults/get-vault-item.sh my-vault document.pdf /tmp/retrieved.pdf
+```
+
+### Remove Vault Item
+
+```bash
+./scripts/vaults/remove-vault-item.sh <vault-id> <item-name>
+```
+
+Remove an item from the vault.
+
+**Example:**
+```bash
+./scripts/vaults/remove-vault-item.sh my-vault old-backup.zip
+```
+
+### Vault Member Management
+
+Vaults support multi-party access - share vaults with other DIDs.
+
+**Add Member:**
+```bash
+./scripts/vaults/add-vault-member.sh <vault-id> <member-did>
+```
+
+**List Members:**
+```bash
+./scripts/vaults/list-vault-members.sh <vault-id>
+```
+
+**Remove Member:**
+```bash
+./scripts/vaults/remove-vault-member.sh <vault-id> <member-did>
+```
+
+**Example workflow (shared project vault):**
+```bash
+# Create shared vault
+./scripts/vaults/create-vault.sh --alias project-vault
+
+# Add team members
+./scripts/vaults/add-vault-member.sh project-vault did:cid:bagaaiera...  # Alice
+./scripts/vaults/add-vault-member.sh project-vault did:cid:bagaaierb...  # Bob
+
+# Verify members
+./scripts/vaults/list-vault-members.sh project-vault
+
+# Add project files
+./scripts/vaults/add-vault-item.sh project-vault specs.pdf
+./scripts/vaults/add-vault-item.sh project-vault design.fig
+```
+
+**Note:** Members have full read/write access to vault contents. Use `--secret-members` flag when creating the vault if members shouldn't see each other.
 
 ## Vault Backups
 

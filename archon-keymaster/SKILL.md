@@ -97,6 +97,16 @@ Create a credential schema from a JSON file.
 **Example schema (proof-of-human.json):**
 ```json
 {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$credentialContext": [
+        "https://www.w3.org/ns/credentials/v2",
+        "https://archetech.com/schemas/credentials/agent/v1"
+    ],
+    "$credentialType": [
+        "VerifiableCredential",
+        "AgentCredential",
+        "ProofOfHumanCredential"
+    ],
   "name": "proof-of-human",
   "description": "Verifies human status",
   "properties": {

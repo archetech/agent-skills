@@ -97,16 +97,16 @@ Create a credential schema from a JSON file.
 **Example schema (proof-of-human.json):**
 ```json
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$credentialContext": [
-        "https://www.w3.org/ns/credentials/v2",
-        "https://archetech.com/schemas/credentials/agent/v1"
-    ],
-    "$credentialType": [
-        "VerifiableCredential",
-        "AgentCredential",
-        "ProofOfHumanCredential"
-    ],
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$credentialContext": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://archetech.com/schemas/credentials/agent/v1"
+  ],
+  "$credentialType": [
+    "VerifiableCredential",
+    "AgentCredential",
+    "ProofOfHumanCredential"
+  ],
   "name": "proof-of-human",
   "description": "Verifies human status",
   "properties": {
@@ -159,7 +159,7 @@ Creates a bound credential template file for the subject.
 **Example:**
 ```bash
 ./scripts/credentials/bind-credential.sh proof-of-human-schema alice
-# Creates: did-cid-bagaaierb...BOUND.json
+# Creates: bagaaierb...BOUND.json  (subject DID without 'did:cid:' prefix)
 ```
 
 #### 2. Fill in Credential Data
@@ -181,11 +181,11 @@ Edit the `.BOUND.json` file and fill in the `credentialSubject` data:
 ./scripts/credentials/issue-credential.sh <bound-file.json>
 ```
 
-Signs and encrypts the credential, saves to `<subject-did>.ISSUED.json`.
+Signs and encrypts the credential. Returns the credential DID. The underlying `@didcid/keymaster` command may save output files - refer to Keymaster documentation for exact file output behavior.
 
 **Example:**
 ```bash
-./scripts/credentials/issue-credential.sh did-cid-bagaaierb...BOUND.json
+./scripts/credentials/issue-credential.sh bagaaierb...BOUND.json
 # Returns credential DID: did:cid:bagaaierc...
 ```
 
@@ -258,12 +258,12 @@ Revoke a credential you issued (invalidates it).
 
 # 3. Bind credential to Alice
 ./scripts/credentials/bind-credential.sh proof-of-human-schema alice
-# Creates: did-cid-alice...BOUND.json
+# Creates: bagaaierb...BOUND.json  (alice's DID without prefix)
 
 # 4. Edit file, set credence: 0.97
 
 # 5. Issue credential
-./scripts/credentials/issue-credential.sh did-cid-alice... BOUND.json
+./scripts/credentials/issue-credential.sh bagaaierb...BOUND.json
 # Returns: did:cid:bagaaierc...
 
 # 6. Alice accepts it

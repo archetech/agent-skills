@@ -14,7 +14,7 @@ if [ -z "$1" ]; then
     echo "The bound credential file should contain filled-in credentialSubject data"
     echo ""
     echo "Example:"
-    echo "  $0 did-cid-bagaaierb...BOUND.json"
+    echo "  $0 bagaaierb...BOUND.json"
     exit 1
 fi
 

@@ -263,7 +263,7 @@ Revoke a credential you issued (invalidates it).
 # 4. Edit file, set credence: 0.97
 
 # 5. Issue credential
-./scripts/credentials/issue-credential.sh did-cid-alice...BOUND.json
+./scripts/credentials/issue-credential.sh did-cid-alice... BOUND.json
 # Returns: did:cid:bagaaierc...
 
 # 6. Alice accepts it

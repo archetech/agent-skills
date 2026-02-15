@@ -1,6 +1,6 @@
 ---
 name: archon-keymaster
-description: Complete Archon DID toolkit - identity management, encrypted messaging (dmail), Nostr integration, file encryption/signing, aliasing, and vault backups. Use for any Archon/DID operations including creating identities, sending encrypted messages between DIDs, deriving Nostr keypairs from DID, encrypting/signing files, managing DID aliases, or backing up to distributed vaults.
+description: Complete Archon DID toolkit - identity management, verifiable credentials, encrypted messaging (dmail), Nostr integration, file encryption/signing, aliasing, and vault backups. Use for any Archon/DID operations including creating identities, issuing/accepting verifiable credentials, sending encrypted messages between DIDs, deriving Nostr keypairs from DID, encrypting/signing files, managing DID aliases, or backing up to distributed vaults.
 ---
 
 # Archon Keymaster - Complete DID Toolkit
@@ -10,11 +10,12 @@ Comprehensive toolkit for Archon decentralized identities (DIDs). Manages identi
 ## Capabilities
 
 - **Identity Management** - Create, manage multiple DIDs, recover from mnemonic
+- **Verifiable Credentials** - Create schemas, issue/accept/revoke credentials
 - **Encrypted Messaging (Dmail)** - Send/receive end-to-end encrypted messages between DIDs
 - **Nostr Integration** - Derive Nostr keypairs from your DID (same secp256k1 key)
 - **File Encryption** - Encrypt files for specific DIDs
 - **Digital Signatures** - Sign and verify files with your DID
-- **DID Aliasing** - Friendly names for DIDs (contacts, schemas, vaults)
+- **DID Aliasing** - Friendly names for DIDs (contacts, schemas, credentials, vaults)
 - **Vault Backups** - Encrypted, distributed backups of workspace/config/memory
 
 ## Prerequisites
@@ -79,6 +80,188 @@ Recovers everything from just your 12-word mnemonic.
 ```
 
 If you already have your wallet, use this to restore workspace/config/memory from vault backups.
+
+
+## Verifiable Credential Schemas
+
+Create and manage schemas for verifiable credentials.
+
+### Create Schema
+
+```bash
+./scripts/schemas/create-schema.sh <schema-file.json>
+```
+
+Create a credential schema from a JSON file.
+
+**Example schema (proof-of-human.json):**
+```json
+{
+  "name": "proof-of-human",
+  "description": "Verifies human status",
+  "properties": {
+    "credence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Confidence level (0-1) that subject is human"
+    }
+  },
+  "required": ["credence"]
+}
+```
+
+```bash
+./scripts/schemas/create-schema.sh proof-of-human.json
+# Returns: did:cid:bagaaiera4yl4xi...
+```
+
+### List Your Schemas
+
+```bash
+./scripts/schemas/list-schemas.sh
+```
+
+Lists all schemas you own.
+
+### Get Schema
+
+```bash
+./scripts/schemas/get-schema.sh <schema-did-or-alias>
+```
+
+Retrieve schema definition by DID or alias.
+
+## Verifiable Credentials
+
+Issue, accept, and manage verifiable credentials.
+
+### Issuing Credentials (3-step process)
+
+#### 1. Bind Credential to Subject
+
+```bash
+./scripts/credentials/bind-credential.sh <schema-did-or-alias> <subject-did-or-alias>
+```
+
+Creates a bound credential template file for the subject.
+
+**Example:**
+```bash
+./scripts/credentials/bind-credential.sh proof-of-human-schema alice
+# Creates: did-cid-bagaaierb...BOUND.json
+```
+
+#### 2. Fill in Credential Data
+
+Edit the `.BOUND.json` file and fill in the `credentialSubject` data:
+
+```json
+{
+  "credentialSubject": {
+    "id": "did:cid:bagaaierb...",
+    "credence": 0.97
+  }
+}
+```
+
+#### 3. Issue Credential
+
+```bash
+./scripts/credentials/issue-credential.sh <bound-file.json>
+```
+
+Signs and encrypts the credential, saves to `<subject-did>.ISSUED.json`.
+
+**Example:**
+```bash
+./scripts/credentials/issue-credential.sh did-cid-bagaaierb...BOUND.json
+# Returns credential DID: did:cid:bagaaierc...
+```
+
+### Accepting Credentials
+
+```bash
+./scripts/credentials/accept-credential.sh <credential-did>
+```
+
+Accept and save a credential issued to you.
+
+**Example:**
+```bash
+./scripts/credentials/accept-credential.sh did:cid:bagaaierc...
+```
+
+### Managing Credentials
+
+#### List Your Credentials
+
+```bash
+./scripts/credentials/list-credentials.sh
+```
+
+Lists all credentials you've received.
+
+#### List Issued Credentials
+
+```bash
+./scripts/credentials/list-issued.sh
+```
+
+Lists all credentials you've issued to others.
+
+#### Get Credential
+
+```bash
+./scripts/credentials/get-credential.sh <credential-did-or-alias>
+```
+
+Retrieve full credential details.
+
+### Publishing & Revoking
+
+#### Publish Credential
+
+```bash
+./scripts/credentials/publish-credential.sh <credential-did>
+```
+
+Add credential to your public DID manifest (makes it visible to others).
+
+#### Revoke Credential
+
+```bash
+./scripts/credentials/revoke-credential.sh <credential-did>
+```
+
+Revoke a credential you issued (invalidates it).
+
+### Complete Example: Issuing Proof-of-Human
+
+```bash
+# 1. Create schema
+./scripts/schemas/create-schema.sh proof-of-human.json
+# Returns: did:cid:bagaaiera4yl4xi...
+
+# 2. Add alias for convenience
+./scripts/aliases/add-alias.sh proof-of-human-schema did:cid:bagaaiera4yl4xi...
+
+# 3. Bind credential to Alice
+./scripts/credentials/bind-credential.sh proof-of-human-schema alice
+# Creates: did-cid-alice...BOUND.json
+
+# 4. Edit file, set credence: 0.97
+
+# 5. Issue credential
+./scripts/credentials/issue-credential.sh did-cid-alice...BOUND.json
+# Returns: did:cid:bagaaierc...
+
+# 6. Alice accepts it
+./scripts/credentials/accept-credential.sh did:cid:bagaaierc...
+
+# 7. Alice publishes to her manifest
+./scripts/credentials/publish-credential.sh did:cid:bagaaierc...
+```
 
 ## Encrypted Messaging (Dmail)
 

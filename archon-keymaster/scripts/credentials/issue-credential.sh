@@ -41,4 +41,4 @@ export ARCHON_WALLET_PATH="${ARCHON_WALLET_PATH:-$HOME/clawd/wallet.json}"
 
 # Issue credential
 echo "Issuing credential from $CREDENTIAL_FILE..."
-npx --yes @didcid/keymaster issue-credential "$CREDENTIAL_FILE" "$@"
+npx @didcid/keymaster issue-credential "$CREDENTIAL_FILE" "$@"

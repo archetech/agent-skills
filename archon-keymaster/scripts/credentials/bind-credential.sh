@@ -34,7 +34,7 @@ fi
 export ARCHON_WALLET_PATH="${ARCHON_WALLET_PATH:-$HOME/clawd/wallet.json}"
 
 # Resolve subject DID to get actual DID (in case it's an alias)
-SUBJECT_RESOLVED=$(npx --yes @didcid/keymaster get-alias "$SUBJECT_DID" 2>/dev/null || echo "$SUBJECT_DID")
+SUBJECT_RESOLVED=$(npx @didcid/keymaster get-alias "$SUBJECT_DID" 2>/dev/null || echo "$SUBJECT_DID")
 
 # Bind credential
 echo "Binding credential for subject $SUBJECT_DID using schema $SCHEMA_DID..."
@@ -44,7 +44,7 @@ SUBJECT_SHORT=$(echo "$SUBJECT_RESOLVED" | sed 's/did:cid://')
 OUTPUT_FILE="${SUBJECT_SHORT}.BOUND.json"
 
 # Run bind command and save to file
-npx --yes @didcid/keymaster bind-credential "$SCHEMA_DID" "$SUBJECT_DID" | tee "$OUTPUT_FILE"
+npx @didcid/keymaster bind-credential "$SCHEMA_DID" "$SUBJECT_DID" | tee "$OUTPUT_FILE"
 
 echo ""
 echo "Saved bound credential to: $OUTPUT_FILE"

@@ -30,4 +30,4 @@ fi
 export ARCHON_WALLET_PATH="${ARCHON_WALLET_PATH:-$HOME/clawd/wallet.json}"
 
 # Get schema
-npx --yes @didcid/keymaster get-schema "$SCHEMA_DID"
+npx @didcid/keymaster get-schema "$SCHEMA_DID"

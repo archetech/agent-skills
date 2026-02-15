@@ -17,4 +17,4 @@ fi
 export ARCHON_WALLET_PATH="${ARCHON_WALLET_PATH:-$HOME/clawd/wallet.json}"
 
 # List schemas
-npx --yes @didcid/keymaster list-schemas
+npx @didcid/keymaster list-schemas

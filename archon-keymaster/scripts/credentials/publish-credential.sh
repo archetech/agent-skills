@@ -31,4 +31,4 @@ export ARCHON_WALLET_PATH="${ARCHON_WALLET_PATH:-$HOME/clawd/wallet.json}"
 
 # Publish credential
 echo "Publishing credential $CREDENTIAL_DID to manifest..."
-npx --yes @didcid/keymaster publish-credential "$CREDENTIAL_DID"
+npx @didcid/keymaster publish-credential "$CREDENTIAL_DID"

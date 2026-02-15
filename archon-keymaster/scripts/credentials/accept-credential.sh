@@ -34,4 +34,4 @@ export ARCHON_WALLET_PATH="${ARCHON_WALLET_PATH:-$HOME/clawd/wallet.json}"
 
 # Accept credential
 echo "Accepting credential $CREDENTIAL_DID..."
-npx --yes @didcid/keymaster accept-credential "$CREDENTIAL_DID" "$@"
+npx @didcid/keymaster accept-credential "$CREDENTIAL_DID" "$@"

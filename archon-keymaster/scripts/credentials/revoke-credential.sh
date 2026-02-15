@@ -31,4 +31,4 @@ export ARCHON_WALLET_PATH="${ARCHON_WALLET_PATH:-$HOME/clawd/wallet.json}"
 
 # Revoke credential
 echo "Revoking credential $CREDENTIAL_DID..."
-npx --yes @didcid/keymaster revoke-credential "$CREDENTIAL_DID"
+npx @didcid/keymaster revoke-credential "$CREDENTIAL_DID"

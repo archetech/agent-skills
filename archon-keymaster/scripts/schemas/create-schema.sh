@@ -47,4 +47,4 @@ export ARCHON_WALLET_PATH="${ARCHON_WALLET_PATH:-$HOME/clawd/wallet.json}"
 
 # Create schema
 echo "Creating schema from $SCHEMA_FILE..."
-npx --yes @didcid/keymaster create-schema "$SCHEMA_FILE" "$@"
+npx @didcid/keymaster create-schema "$SCHEMA_FILE" "$@"

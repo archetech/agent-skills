@@ -1,6 +1,6 @@
 ---
 name: archon-keymaster
-description: Complete Archon DID toolkit - identity management, verifiable credentials, encrypted messaging (dmail), Nostr integration, file encryption/signing, aliasing, vault management, encrypted backups, and authorization (challenge/response). Use for any Archon/DID operations including creating identities, issuing/accepting verifiable credentials, sending encrypted messages between DIDs, deriving Nostr keypairs from DID, encrypting/signing files, managing DID aliases, creating/managing vaults, sharing vaults with multiple DIDs, backing up to distributed vaults, or performing DID-based challenge/response authorization.
+description: Complete Archon DID toolkit - identity management, verifiable credentials, encrypted messaging (dmail), Nostr integration, file encryption/signing, aliasing, vault management, encrypted backups, authorization (challenge/response), and cryptographic polls. Use for any Archon/DID operations including creating identities, issuing/accepting verifiable credentials, sending encrypted messages between DIDs, deriving Nostr keypairs from DID, encrypting/signing files, managing DID aliases, creating/managing vaults, sharing vaults with multiple DIDs, backing up to distributed vaults, performing DID-based challenge/response authorization, or running cryptographically verifiable polls.
 ---
 
 # Archon Keymaster - Complete DID Toolkit
@@ -19,6 +19,7 @@ Comprehensive toolkit for Archon decentralized identities (DIDs). Manages identi
 - **Vault Management** - Create vaults, add/remove items, manage multi-party access
 - **Vault Backups** - Encrypted, distributed backups of workspace/config/memory
 - **Authorization** - Challenge/response verification between DIDs
+- **Polls** - Cryptographic voting with transparent or secret ballots
 
 ## Prerequisites
 
@@ -829,6 +830,158 @@ RESPONSE=$(./scripts/auth/create-response.sh "$CHALLENGE")
 ./scripts/auth/verify-response.sh "$RESPONSE"
 # → {"match": true, "responder": "did:cid:...", ...}
 ```
+
+## Polls
+
+Cryptographically verifiable voting with support for transparent or secret ballots. Polls use DID groups for voter eligibility (roster).
+
+### Create Poll Template
+
+```bash
+./scripts/polls/create-poll-template.sh
+```
+
+Outputs a template JSON:
+```json
+{
+    "type": "poll",
+    "version": 1,
+    "description": "What is this poll about?",
+    "roster": "DID of the eligible voter group",
+    "options": ["yes", "no", "abstain"],
+    "deadline": "2026-02-24T21:21:43.666Z"
+}
+```
+
+### Create Poll
+
+```bash
+./scripts/polls/create-poll.sh <poll-file.json> [options]
+```
+
+Creates a poll from a JSON template file. Returns poll DID.
+
+**Options:**
+- `--alias TEXT` - DID alias for the poll
+- `--registry TEXT` - Registry URL (default: hyperswarm)
+
+**Example:**
+```bash
+# Create poll template
+./scripts/polls/create-poll-template.sh > my-poll.json
+
+# Edit poll (set description, roster, options, deadline)
+vi my-poll.json
+
+# Create the poll
+./scripts/polls/create-poll.sh my-poll.json
+# Returns: did:cid:bagaaiera...
+```
+
+### Vote in Poll
+
+```bash
+./scripts/polls/vote-poll.sh <poll-did> <vote> [spoil]
+```
+
+Cast a vote in a poll. Vote must match one of the poll options.
+
+**Arguments:**
+- `poll-did` - DID of the poll
+- `vote` - Your vote (must match one of the poll options)
+- `spoil` - Optional: any value to spoil the ballot
+
+**Examples:**
+```bash
+# Cast a vote
+./scripts/polls/vote-poll.sh did:cid:bagaaiera... yes
+
+# Spoil ballot (intentionally invalid)
+./scripts/polls/vote-poll.sh did:cid:bagaaiera... abstain spoil
+```
+
+### View Poll
+
+```bash
+./scripts/polls/view-poll.sh <poll-did>
+```
+
+View poll details including options, deadline, and (if published) results.
+
+### Publish Poll Results
+
+Two options for publishing results:
+
+**Secret ballots (default):**
+```bash
+./scripts/polls/publish-poll.sh <poll-did>
+```
+Publishes aggregate results while hiding individual votes.
+
+**Transparent ballots:**
+```bash
+./scripts/polls/reveal-poll.sh <poll-did>
+```
+Publishes results with individual ballots visible (who voted for what).
+
+### Unpublish Poll Results
+
+```bash
+./scripts/polls/unpublish-poll.sh <poll-did>
+```
+
+Remove published results from a poll.
+
+### Complete Polling Example
+
+```bash
+# 1. Create a voter group (roster)
+# The roster DID defines who can vote
+npx @didcid/keymaster create-group --name voters
+
+# 2. Add members to the group
+npx @didcid/keymaster add-group-member voters did:cid:alice...
+npx @didcid/keymaster add-group-member voters did:cid:bob...
+npx @didcid/keymaster add-group-member voters did:cid:carol...
+
+# 3. Create poll template
+./scripts/polls/create-poll-template.sh > team-vote.json
+
+# 4. Edit poll:
+# {
+#   "type": "poll",
+#   "version": 1,
+#   "description": "Should we adopt the new proposal?",
+#   "roster": "did:cid:voters-group-did...",
+#   "options": ["approve", "reject", "defer"],
+#   "deadline": "2026-03-01T00:00:00.000Z"
+# }
+
+# 5. Create the poll
+POLL=$(./scripts/polls/create-poll.sh team-vote.json)
+echo "Poll created: $POLL"
+
+# 6. Members vote
+./scripts/polls/vote-poll.sh "$POLL" approve   # Alice
+./scripts/polls/vote-poll.sh "$POLL" reject    # Bob
+./scripts/polls/vote-poll.sh "$POLL" approve   # Carol
+
+# 7. View current status
+./scripts/polls/view-poll.sh "$POLL"
+
+# 8. After deadline, publish results (hiding who voted what)
+./scripts/polls/publish-poll.sh "$POLL"
+
+# OR publish transparently
+./scripts/polls/reveal-poll.sh "$POLL"
+```
+
+### Use Cases
+
+- **Governance decisions** - DAO-style voting with verifiable results
+- **Team consensus** - Anonymous feedback or transparent decision-making
+- **Multi-agent coordination** - Agents voting on shared resources
+- **Access control** - Voting to add/remove group members
 
 ## Advanced Usage
 

@@ -24,6 +24,13 @@ fi
 # Expand ~ if present
 WALLET_PATH="${WALLET_PATH/#\~/$HOME}"
 
+# Validate wallet path (reject shell metacharacters that could cause injection)
+if [[ "$WALLET_PATH" =~ [\$\`\"\'\;] ]] || [[ "$WALLET_PATH" =~ $'\n' ]]; then
+    echo "ERROR: Wallet path contains invalid characters (\$, \`, \", ', ;, or newlines)"
+    echo "Please use a simple path like: ~/.archon.wallet.json"
+    exit 1
+fi
+
 echo ""
 echo "Using wallet path: $WALLET_PATH"
 echo ""

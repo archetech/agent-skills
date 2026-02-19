@@ -27,7 +27,15 @@ echo "=== DID Vault Backup $(date) ==="
 
 # Backup workspace (excludes .git, node_modules, etc per .backup-ignore)
 echo "Backing up workspace..."
-WORKSPACE_DIR=$(dirname "$ARCHON_WALLET_PATH")
+WORKSPACE_DIR="$PWD"
+
+# Sanity check: abort if workspace is $HOME or / (likely misconfigured)
+if [ "$WORKSPACE_DIR" = "$HOME" ] || [ "$WORKSPACE_DIR" = "/" ]; then
+    echo "ERROR: Workspace appears to be \$HOME or /. This would backup too much."
+    echo "Run this script from your agent workspace directory."
+    exit 1
+fi
+
 cd /tmp
 rm -f workspace.zip
 zip -q -r workspace.zip "$WORKSPACE_DIR" -x@"$WORKSPACE_DIR/.backup-ignore" 2>/dev/null || \

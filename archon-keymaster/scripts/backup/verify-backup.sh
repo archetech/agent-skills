@@ -4,21 +4,24 @@
 
 set -e
 
-# Load passphrase from .archon.env
-if [ -f ~/clawd/.archon.env ]; then
-    source ~/clawd/.archon.env
+# Load environment
+if [ -f ~/.archon.env ]; then
+    source ~/.archon.env
     export ARCHON_PASSPHRASE
 else
-    echo "ERROR: ~/clawd/.archon.env not found"
+    echo "ERROR: ~/.archon.env not found"
+    exit 1
+fi
+
+# Require ARCHON_WALLET_PATH
+if [ -z "$ARCHON_WALLET_PATH" ]; then
+    echo "Error: ARCHON_WALLET_PATH not set in ~/.archon.env"
     exit 1
 fi
 
 # Use public Gatekeeper by default (10MB limit)
 # Override with local if needed: export ARCHON_GATEKEEPER_URL="http://localhost:4224"
 export ARCHON_GATEKEEPER_URL="${ARCHON_GATEKEEPER_URL:-https://archon.technology}"
-
-# Ensure Keymaster uses correct wallet
-export KEYMASTER_WALLET="$HOME/clawd/wallet.json"
 
 echo "=== Backup Verification $(date) ==="
 echo ""
@@ -38,7 +41,7 @@ verify_item() {
     echo "Verifying $item_name..."
     
     # Try to retrieve from vault
-    if ! (cd ~/clawd && npx @didcid/keymaster get-vault-item backup "$item_name" "$VERIFY_DIR/$item_name" 2>&1); then
+    if ! npx @didcid/keymaster get-vault-item backup "$item_name" "$VERIFY_DIR/$item_name" 2>&1; then
         echo "  ✗ FAILED: Could not retrieve $item_name from vault"
         ERRORS=$((ERRORS + 1))
         return 1

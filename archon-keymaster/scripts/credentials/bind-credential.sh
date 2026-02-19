@@ -31,7 +31,10 @@ if [ -z "$ARCHON_PASSPHRASE" ]; then
 fi
 
 # Set wallet path
-export ARCHON_WALLET_PATH="${ARCHON_WALLET_PATH:-$HOME/clawd/wallet.json}"
+if [ -z "$ARCHON_WALLET_PATH" ]; then
+    echo "Error: ARCHON_WALLET_PATH not set in ~/.archon.env"
+    exit 1
+fi
 
 # Resolve subject DID to get actual DID (in case it's an alias)
 SUBJECT_RESOLVED=$(npx @didcid/keymaster get-alias "$SUBJECT_DID" 2>/dev/null || echo "$SUBJECT_DID")

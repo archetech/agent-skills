@@ -25,27 +25,35 @@ Comprehensive toolkit for Archon decentralized identities (DIDs). Manages identi
 ## Prerequisites
 
 - Node.js installed (for `npx @didcid/keymaster`)
-- Environment: `~/.archon.env` with `ARCHON_PASSPHRASE` (created by setup)
-- Wallet: `~/clawd/wallet.json` (created by setup)
+- Environment: `~/.archon.env` with:
+  - `ARCHON_WALLET_PATH` - path to your wallet file (required)
+  - `ARCHON_PASSPHRASE` - wallet encryption passphrase (required)
+  - `ARCHON_GATEKEEPER_URL` - gatekeeper endpoint (optional, defaults to public)
+- All created automatically by `create-id.sh`
 
 ## Quick Start
 
 ### First-Time Setup
 
 ```bash
-./scripts/identity/create-id.sh
+./scripts/identity/create-id.sh [wallet-path]
 ```
 
-Creates your first DID, generates passphrase, saves to `~/.archon.env`. **Write down your 12-word mnemonic** - it's your master recovery key.
+Creates your first DID, generates passphrase, saves to `~/.archon.env`. 
+
+- Default wallet location: `~/.archon.wallet.json`
+- You can specify a custom path: `./scripts/identity/create-id.sh ~/my-wallet.json`
+- **Write down your 12-word mnemonic** - it's your master recovery key.
 
 ### Load Environment
 
-All scripts require environment variables:
+All scripts require `~/.archon.env` to be configured. Simply run:
 
 ```bash
 source ~/.archon.env
-export ARCHON_WALLET_PATH="${ARCHON_WALLET_PATH:-$HOME/clawd/wallet.json}"
 ```
+
+The environment file sets `ARCHON_WALLET_PATH` and `ARCHON_PASSPHRASE`. Scripts will error if these are not set.
 
 ## Identity Management
 

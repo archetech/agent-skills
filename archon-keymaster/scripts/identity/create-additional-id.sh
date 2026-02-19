@@ -16,15 +16,6 @@ fi
 
 DID_NAME="$1"
 
-# Check if wallet exists
-if [ ! -f ~/clawd/wallet.json ]; then
-    echo "ERROR: No wallet found at ~/clawd/wallet.json"
-    echo ""
-    echo "Create your first identity with:"
-    echo "  ./scripts/identity/create-id.sh"
-    exit 1
-fi
-
 # Load environment
 if [ -f ~/.archon.env ]; then
     source ~/.archon.env
@@ -35,13 +26,27 @@ else
     exit 1
 fi
 
+# Require ARCHON_WALLET_PATH
+if [ -z "$ARCHON_WALLET_PATH" ]; then
+    echo "Error: ARCHON_WALLET_PATH not set in ~/.archon.env"
+    exit 1
+fi
+
+# Check if wallet exists
+if [ ! -f "$ARCHON_WALLET_PATH" ]; then
+    echo "ERROR: No wallet found at $ARCHON_WALLET_PATH"
+    echo ""
+    echo "Create your first identity with:"
+    echo "  ./scripts/identity/create-id.sh"
+    exit 1
+fi
+
 echo "=== Creating Additional DID ==="
 echo ""
 echo "Name: $DID_NAME"
-echo "Wallet: ~/clawd/wallet.json"
+echo "Wallet: $ARCHON_WALLET_PATH"
 echo ""
 
-cd ~/clawd
 npx @didcid/keymaster create-did --name "$DID_NAME"
 
 echo ""

@@ -12,16 +12,21 @@ else
     exit 1
 fi
 
+# Require ARCHON_WALLET_PATH
+if [ -z "$ARCHON_WALLET_PATH" ]; then
+    echo "Error: ARCHON_WALLET_PATH not set in ~/.archon.env"
+    exit 1
+fi
+
 # Check wallet exists
-if [ ! -f ~/clawd/wallet.json ]; then
-    echo "ERROR: No wallet found at ~/clawd/wallet.json"
+if [ ! -f "$ARCHON_WALLET_PATH" ]; then
+    echo "ERROR: No wallet found at $ARCHON_WALLET_PATH"
     exit 1
 fi
 
 echo "=== Your Archon DIDs ==="
 echo ""
 
-cd ~/clawd
 npx @didcid/keymaster list-dids
 
 echo ""

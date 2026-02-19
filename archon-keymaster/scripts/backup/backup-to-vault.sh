@@ -4,12 +4,18 @@
 
 set -e
 
-# Load passphrase from .archon.env
-if [ -f ~/clawd/.archon.env ]; then
-    source ~/clawd/.archon.env
+# Load environment
+if [ -f ~/.archon.env ]; then
+    source ~/.archon.env
     export ARCHON_PASSPHRASE  # Must explicitly export for npx subprocesses
 else
-    echo "ERROR: ~/clawd/.archon.env not found"
+    echo "ERROR: ~/.archon.env not found"
+    exit 1
+fi
+
+# Require ARCHON_WALLET_PATH
+if [ -z "$ARCHON_WALLET_PATH" ]; then
+    echo "Error: ARCHON_WALLET_PATH not set in ~/.archon.env"
     exit 1
 fi
 
@@ -17,17 +23,16 @@ fi
 # Override with local if needed: export ARCHON_GATEKEEPER_URL="http://localhost:4224"
 export ARCHON_GATEKEEPER_URL="${ARCHON_GATEKEEPER_URL:-https://archon.technology}"
 
-# Ensure Keymaster always uses the correct wallet regardless of cwd
-export KEYMASTER_WALLET="$HOME/clawd/wallet.json"
-
 echo "=== DID Vault Backup $(date) ==="
 
 # Backup workspace (excludes .git, node_modules, etc per .backup-ignore)
 echo "Backing up workspace..."
+WORKSPACE_DIR=$(dirname "$ARCHON_WALLET_PATH")
 cd /tmp
 rm -f workspace.zip
-zip -q -r workspace.zip ~/clawd -x@$HOME/clawd/.backup-ignore
-(cd ~/clawd && npx @didcid/keymaster add-vault-item backup /tmp/workspace.zip)
+zip -q -r workspace.zip "$WORKSPACE_DIR" -x@"$WORKSPACE_DIR/.backup-ignore" 2>/dev/null || \
+    zip -q -r workspace.zip "$WORKSPACE_DIR"
+npx @didcid/keymaster add-vault-item backup /tmp/workspace.zip
 echo "✓ workspace.zip ($(du -h workspace.zip | cut -f1))"
 
 # Backup config (excludes sessions, cache, logs per patterns)
@@ -42,14 +47,16 @@ zip -q -r /tmp/config.zip . \
   -x 'browser/*' \
   -x 'media/*' \
   -x 'canvas/*'
-(cd ~/clawd && npx @didcid/keymaster add-vault-item backup /tmp/config.zip)
+npx @didcid/keymaster add-vault-item backup /tmp/config.zip
 echo "✓ config.zip ($(du -h /tmp/config.zip | cut -f1))"
 
-# Backup hexmem database
-echo "Backing up hexmem..."
-cd ~/clawd
-npx @didcid/keymaster add-vault-item backup hexmem/hexmem.db
-echo "✓ hexmem.db ($(du -h hexmem/hexmem.db | cut -f1))"
+# Backup hexmem database if it exists
+HEXMEM_PATH="$WORKSPACE_DIR/hexmem/hexmem.db"
+if [ -f "$HEXMEM_PATH" ]; then
+    echo "Backing up hexmem..."
+    npx @didcid/keymaster add-vault-item backup "$HEXMEM_PATH"
+    echo "✓ hexmem.db ($(du -h "$HEXMEM_PATH" | cut -f1))"
+fi
 
 # Verify
 echo ""

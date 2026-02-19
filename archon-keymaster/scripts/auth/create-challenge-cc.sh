@@ -22,7 +22,10 @@ if [ -z "$ARCHON_PASSPHRASE" ]; then
 fi
 
 # Set wallet path
-export ARCHON_WALLET_PATH="${ARCHON_WALLET_PATH:-$HOME/clawd/wallet.json}"
+if [ -z "$ARCHON_WALLET_PATH" ]; then
+    echo "Error: ARCHON_WALLET_PATH not set in ~/.archon.env"
+    exit 1
+fi
 
 # Create challenge from credential DID
 npx @didcid/keymaster create-challenge-cc "$@"

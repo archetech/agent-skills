@@ -22,18 +22,24 @@ else
     exit 1
 fi
 
+# Require ARCHON_WALLET_PATH
+if [ -z "$ARCHON_WALLET_PATH" ]; then
+    echo "Error: ARCHON_WALLET_PATH not set in ~/.archon.env"
+    exit 1
+fi
+
 # Check wallet exists
-if [ ! -f ~/clawd/wallet.json ]; then
-    echo "ERROR: No wallet found"
+if [ ! -f "$ARCHON_WALLET_PATH" ]; then
+    echo "ERROR: No wallet found at $ARCHON_WALLET_PATH"
     exit 1
 fi
 
 # Verify DID exists
-if ! (cd ~/clawd && npx @didcid/keymaster list-dids | grep -q "$DID_NAME"); then
+if ! npx @didcid/keymaster list-dids | grep -q "$DID_NAME"; then
     echo "ERROR: DID '$DID_NAME' not found in wallet"
     echo ""
     echo "Available DIDs:"
-    cd ~/clawd && npx @didcid/keymaster list-dids
+    npx @didcid/keymaster list-dids
     exit 1
 fi
 

@@ -84,18 +84,34 @@ if [ ! -d "$WALLET_DIR" ]; then
     echo "✓ Created directory: $WALLET_DIR"
 fi
 
-# Create DID
+# Create wallet first
 echo ""
-echo "Creating your Archon DID..."
-echo "(This will prompt you to create a wallet and generate a mnemonic)"
+echo "Creating wallet..."
 echo ""
 
-npx @didcid/keymaster create-did
+WALLET_OUTPUT=$(npx @didcid/keymaster create-wallet 2>&1)
+echo "$WALLET_OUTPUT"
+
+# Extract and display the mnemonic for the user
+echo ""
+echo "=========================================="
+echo "  SAVE YOUR MNEMONIC (12 words above)    "
+echo "=========================================="
+echo ""
+
+# Prompt for DID name
+read -p "Name for your DID (e.g., 'main', 'work'): " DID_NAME
+DID_NAME="${DID_NAME:-main}"
+
+echo ""
+echo "Creating DID '$DID_NAME'..."
+npx @didcid/keymaster create-id "$DID_NAME"
 
 echo ""
 echo "=== Setup Complete ==="
 echo ""
 echo "✓ Wallet created: $WALLET_PATH"
+echo "✓ DID created: $DID_NAME"
 echo "✓ Environment configured: ~/.archon.env"
 echo ""
 echo "CRITICAL: Your 12-word mnemonic was displayed above."
@@ -110,5 +126,5 @@ echo "  - Save your mnemonic securely (offline!)"
 echo "  - Set up backups: archon-backup skill"
 echo "  - Backup wallet to seed bank: npx @didcid/keymaster backup-wallet-did"
 echo ""
-echo "View your DID:"
-echo "  npx @didcid/keymaster list-dids"
+echo "View your DIDs:"
+echo "  npx @didcid/keymaster list-ids"

@@ -47,7 +47,7 @@ echo "Name: $DID_NAME"
 echo "Wallet: $ARCHON_WALLET_PATH"
 echo ""
 
-npx @didcid/keymaster create-did --name "$DID_NAME"
+npx @didcid/keymaster create-id "$DID_NAME"
 
 echo ""
 echo "✓ DID '$DID_NAME' created"

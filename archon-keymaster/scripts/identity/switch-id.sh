@@ -35,11 +35,11 @@ if [ ! -f "$ARCHON_WALLET_PATH" ]; then
 fi
 
 # Verify DID exists
-if ! npx @didcid/keymaster list-dids | grep -q "$DID_NAME"; then
+if ! npx @didcid/keymaster list-ids | grep -q "$DID_NAME"; then
     echo "ERROR: DID '$DID_NAME' not found in wallet"
     echo ""
     echo "Available DIDs:"
-    npx @didcid/keymaster list-dids
+    npx @didcid/keymaster list-ids
     exit 1
 fi
 

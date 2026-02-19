@@ -27,7 +27,7 @@ fi
 echo "=== Your Archon DIDs ==="
 echo ""
 
-npx @didcid/keymaster list-dids
+npx @didcid/keymaster list-ids
 
 echo ""
 echo "Switch active DID:"

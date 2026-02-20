@@ -70,8 +70,8 @@ echo ""
 # 3. Sign challenge
 echo "[3/6] Signing challenge with your DID..."
 
-# Use keymaster to sign the challenge (create a response DID)
-RESPONSE=$(npx @didcid/keymaster sign-challenge "$CHALLENGE" 2>&1 | tail -n1)
+# Use keymaster to create a response to the challenge
+RESPONSE=$(npx @didcid/keymaster create-response "$CHALLENGE" 2>&1 | tail -n1)
 
 if [ -z "$RESPONSE" ] || ! echo "$RESPONSE" | grep -q "^did:cid:"; then
     echo "Error: Failed to sign challenge"

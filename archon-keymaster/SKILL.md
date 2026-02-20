@@ -910,7 +910,7 @@ RESPONSE=$(./scripts/auth/create-response.sh "$CHALLENGE")
 
 ## Polls
 
-Cryptographically verifiable voting with support for transparent or secret ballots. Polls use DID groups for voter eligibility (roster).
+Cryptographically verifiable voting with support for transparent or secret ballots. Voters are added directly to polls (no separate roster required).
 
 ### Create Poll Template
 
@@ -918,15 +918,14 @@ Cryptographically verifiable voting with support for transparent or secret ballo
 ./scripts/polls/create-poll-template.sh
 ```
 
-Outputs a template JSON:
+Outputs a v2 template JSON:
 ```json
 {
-    "type": "poll",
-    "version": 1,
+    "version": 2,
+    "name": "poll-name",
     "description": "What is this poll about?",
-    "roster": "DID of the eligible voter group",
     "options": ["yes", "no", "abstain"],
-    "deadline": "2026-02-24T21:21:43.666Z"
+    "deadline": "2026-03-01T00:00:00.000Z"
 }
 ```
 
@@ -947,7 +946,7 @@ Creates a poll from a JSON template file. Returns poll DID.
 # Create poll template
 ./scripts/polls/create-poll-template.sh > my-poll.json
 
-# Edit poll (set description, roster, options, deadline)
+# Edit poll (set name, description, options, deadline)
 vi my-poll.json
 
 # Create the poll
@@ -955,27 +954,72 @@ vi my-poll.json
 # Returns: did:cid:bagaaiera...
 ```
 
+### Manage Voters
+
+Add, remove, or list eligible voters for a poll:
+
+```bash
+# Add a voter
+./scripts/polls/add-poll-voter.sh <poll-did> <voter-did>
+
+# Remove a voter
+./scripts/polls/remove-poll-voter.sh <poll-did> <voter-did>
+
+# List all eligible voters
+./scripts/polls/list-poll-voters.sh <poll-did>
+```
+
 ### Vote in Poll
 
 ```bash
-./scripts/polls/vote-poll.sh <poll-did> <vote> [spoil]
+./scripts/polls/vote-poll.sh <poll-did> <vote-index>
 ```
 
-Cast a vote in a poll. Vote must match one of the poll options.
+Cast a vote in a poll. Returns a ballot DID.
 
 **Arguments:**
 - `poll-did` - DID of the poll
-- `vote` - Your vote (must match one of the poll options)
-- `spoil` - Optional: any value to spoil the ballot
+- `vote-index` - Vote number: 0 = spoil, 1-N = option index
 
 **Examples:**
 ```bash
-# Cast a vote
-./scripts/polls/vote-poll.sh did:cid:bagaaiera... yes
+# View poll first to see options
+./scripts/polls/view-poll.sh did:cid:bagaaiera...
+# Options: 1=yes, 2=no, 3=abstain
 
-# Spoil ballot (intentionally invalid)
-./scripts/polls/vote-poll.sh did:cid:bagaaiera... abstain spoil
+# Cast a vote for "yes" (option 1)
+./scripts/polls/vote-poll.sh did:cid:bagaaiera... 1
+# Returns: did:cid:bagaaierballot...
+
+# Spoil ballot (vote 0)
+./scripts/polls/vote-poll.sh did:cid:bagaaiera... 0
 ```
+
+### Ballot Workflow
+
+For distributed voting (voters not directly connected to poll owner):
+
+```bash
+# Voter creates and sends ballot
+BALLOT=$(./scripts/polls/vote-poll.sh "$POLL" 1)
+./scripts/polls/send-ballot.sh "$BALLOT" "$POLL"
+
+# Poll owner receives and adds ballot
+./scripts/polls/update-poll.sh "$BALLOT"
+
+# View ballot details
+./scripts/polls/view-ballot.sh "$BALLOT"
+```
+
+### Send Poll Notice
+
+Notify all voters about a poll:
+
+```bash
+./scripts/polls/send-poll.sh <poll-did>
+```
+
+Creates a notice DID that voters can use to find and vote in the poll.
 
 ### View Poll
 
@@ -983,7 +1027,7 @@ Cast a vote in a poll. Vote must match one of the poll options.
 ./scripts/polls/view-poll.sh <poll-did>
 ```
 
-View poll details including options, deadline, and (if published) results.
+View poll details including options (with indices), deadline, and (if published) results.
 
 ### Publish Poll Results
 
@@ -1012,36 +1056,34 @@ Remove published results from a poll.
 ### Complete Polling Example
 
 ```bash
-# 1. Create a voter group (roster)
-# The roster DID defines who can vote
-npx @didcid/keymaster create-group --name voters
-
-# 2. Add members to the group
-npx @didcid/keymaster add-group-member voters did:cid:alice...
-npx @didcid/keymaster add-group-member voters did:cid:bob...
-npx @didcid/keymaster add-group-member voters did:cid:carol...
-
-# 3. Create poll template
+# 1. Create poll template
 ./scripts/polls/create-poll-template.sh > team-vote.json
 
-# 4. Edit poll:
+# 2. Edit poll:
 # {
-#   "type": "poll",
-#   "version": 1,
+#   "version": 2,
+#   "name": "proposal-vote",
 #   "description": "Should we adopt the new proposal?",
-#   "roster": "did:cid:voters-group-did...",
 #   "options": ["approve", "reject", "defer"],
 #   "deadline": "2026-03-01T00:00:00.000Z"
 # }
 
-# 5. Create the poll
+# 3. Create the poll
 POLL=$(./scripts/polls/create-poll.sh team-vote.json)
 echo "Poll created: $POLL"
 
-# 6. Members vote
-./scripts/polls/vote-poll.sh "$POLL" approve   # Alice
-./scripts/polls/vote-poll.sh "$POLL" reject    # Bob
-./scripts/polls/vote-poll.sh "$POLL" approve   # Carol
+# 4. Add eligible voters
+./scripts/polls/add-poll-voter.sh "$POLL" did:cid:alice...
+./scripts/polls/add-poll-voter.sh "$POLL" did:cid:bob...
+./scripts/polls/add-poll-voter.sh "$POLL" did:cid:carol...
+
+# 5. Notify voters
+./scripts/polls/send-poll.sh "$POLL"
+
+# 6. Members vote (1=approve, 2=reject, 3=defer)
+./scripts/polls/vote-poll.sh "$POLL" 1   # Alice votes approve
+./scripts/polls/vote-poll.sh "$POLL" 2   # Bob votes reject
+./scripts/polls/vote-poll.sh "$POLL" 1   # Carol votes approve
 
 # 7. View current status
 ./scripts/polls/view-poll.sh "$POLL"

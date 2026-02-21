@@ -99,7 +99,8 @@ echo ""
 WALLET_OUTPUT=$(npx @didcid/keymaster create-wallet 2>&1)
 echo "$WALLET_OUTPUT"
 
-# Extract and display the mnemonic for the user
+# Display mnemonic explicitly (CLI no longer prints it during create-wallet)
+npx @didcid/keymaster show-mnemonic | tr -d '\r'
 echo ""
 echo "=========================================="
 echo "  SAVE YOUR MNEMONIC (12 words above)    "

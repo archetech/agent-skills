@@ -1,6 +1,6 @@
 ---
 name: archon-keymaster
-description: Complete Archon DID toolkit - identity management, verifiable credentials, encrypted messaging (dmail), Nostr integration, file encryption/signing, aliasing, vault management, encrypted backups, authorization (challenge/response), groups, and cryptographic polls. Use for any Archon/DID operations including creating identities, issuing/accepting verifiable credentials, sending encrypted messages between DIDs, deriving Nostr keypairs from DID, encrypting/signing files, managing DID aliases, creating/managing vaults, sharing vaults with multiple DIDs, backing up to distributed vaults, performing DID-based challenge/response authorization, managing DID groups for access control, or running cryptographically verifiable polls.
+description: Core Archon DID toolkit - identity management, verifiable credentials, encrypted messaging (dmail), Nostr integration, file encryption/signing, aliasing, authorization (challenge/response), groups, and cryptographic polls. Use for creating/managing DIDs, issuing/accepting verifiable credentials, sending encrypted messages between DIDs, deriving Nostr keypairs, encrypting/signing files, managing DID aliases, challenge/response authorization, managing DID groups, or running cryptographically verifiable polls. For vaults/backups see archon-vault; for ecash see archon-cashu.
 metadata:
   openclaw:
     requires:
@@ -14,9 +14,13 @@ metadata:
     emoji: "🔐"
 ---
 
-# Archon Keymaster - Complete DID Toolkit
+# Archon Keymaster - Core DID Toolkit
 
-Comprehensive toolkit for Archon decentralized identities (DIDs). Manages identity lifecycle, encrypted communication, cryptographic operations, and secure backups.
+Core toolkit for Archon decentralized identities (DIDs). Manages identity lifecycle, encrypted communication, cryptographic operations, and authorization.
+
+**Related skills:**
+- `archon-vault` — Vault management and encrypted distributed backups
+- `archon-cashu` — Cashu ecash with DID-locked tokens
 
 ## Capabilities
 
@@ -26,12 +30,11 @@ Comprehensive toolkit for Archon decentralized identities (DIDs). Manages identi
 - **Nostr Integration** - Derive Nostr keypairs from your DID (same secp256k1 key)
 - **File Encryption** - Encrypt files for specific DIDs
 - **Digital Signatures** - Sign and verify files with your DID
-- **DID Aliasing** - Friendly names for DIDs (contacts, schemas, credentials, vaults)
-- **Vault Management** - Create vaults, add/remove items, manage multi-party access
-- **Vault Backups** - Encrypted, distributed backups of workspace/config/memory
+- **DID Aliasing** - Friendly names for DIDs (contacts, schemas, credentials)
 - **Authorization** - Challenge/response verification between DIDs
 - **Groups** - Create and manage DID groups for access control and multi-party operations
 - **Polls** - Cryptographic voting with transparent or secret ballots
+- **Assets** - Store and retrieve content-addressed assets in the registry
 
 ## Prerequisites
 
@@ -44,20 +47,17 @@ Comprehensive toolkit for Archon decentralized identities (DIDs). Manages identi
 
 ## Security Notes
 
-This skill handles cryptographic identity and backup operations:
+This skill handles cryptographic identity operations:
 
 1. **Passphrase in environment**: `ARCHON_PASSPHRASE` is stored in `~/.archon.env` for non-interactive script execution. The file should be `chmod 600`.
 
-2. **Backup scope**: `backup-to-vault.sh` archives `~/clawd` and `~/.openclaw` to your encrypted DID vault. Review `.backup-ignore` files to exclude sensitive items.
-
-3. **Sensitive files accessed**:
+2. **Sensitive files accessed**:
    - `~/.archon.wallet.json` — encrypted wallet containing DID private keys
    - `~/.archon.env` — wallet encryption passphrase
-   - `~/clawd/**`, `~/.openclaw/**` — backed up to vault (if using backup scripts)
 
-4. **Network**: Data is encrypted before transmission to Archon gatekeeper/hyperswarm. Only you (or vault members) can decrypt.
+3. **Network**: Data is encrypted before transmission to Archon gatekeeper/hyperswarm. Only intended recipients can decrypt.
 
-5. **Key recovery**: Your 12-word mnemonic is the master recovery key. Store it offline, never in digital form.
+4. **Key recovery**: Your 12-word mnemonic is the master recovery key. Store it offline, never in digital form.
 
 ## Quick Start
 
@@ -107,20 +107,7 @@ Create pseudonymous personas or role-separated identities (all share same mnemon
 
 ### Recovery
 
-**Complete disaster recovery:**
-```bash
-./scripts/backup/disaster-recovery.sh "word1 word2 ... word12" [target-dir]
-```
-
-Recovers everything from just your 12-word mnemonic.
-
-**Restore from existing wallet:**
-```bash
-./scripts/backup/restore-from-vault.sh [target-dir]
-```
-
-If you already have your wallet, use this to restore workspace/config/memory from vault backups.
-
+For disaster recovery and vault restore operations, see the `archon-backup` skill.
 
 ## Verifiable Credential Schemas
 
@@ -589,133 +576,6 @@ Transfer asset ownership to another DID.
 - **Data Sets**: JSON datasets, configuration files
 - **Shared Resources**: Transfer assets between DIDs for collaboration
 
-## Vault Management
-
-Low-level vault operations for managing encrypted distributed storage.
-
-### Create Vault
-
-```bash
-./scripts/vaults/create-vault.sh [-a|--alias <vault-alias>] [-s|--secret-members]
-```
-
-Creates a new vault and returns its DID. Optionally assign a local alias for easier reference.
-
-**Options:**
-- `-a, --alias` - Local alias for the vault DID
-- `-s, --secret-members` - Keep member list secret from each other
-
-**Examples:**
-```bash
-# Create vault with alias
-./scripts/vaults/create-vault.sh --alias my-vault
-
-# Create vault without alias (returns DID)
-./scripts/vaults/create-vault.sh
-
-# Create secret vault (members don't see each other)
-./scripts/vaults/create-vault.sh --alias secret-vault --secret-members
-```
-
-### Add Vault Item
-
-```bash
-./scripts/vaults/add-vault-item.sh <vault-id> <file-path>
-```
-
-Add a file to the vault. The file is encrypted and distributed across the Archon network.
-
-**Example:**
-```bash
-./scripts/vaults/add-vault-item.sh my-vault /path/to/document.pdf
-./scripts/vaults/add-vault-item.sh backup workspace.zip
-```
-
-### List Vault Items
-
-```bash
-./scripts/vaults/list-vault-items.sh <vault-id>
-```
-
-List all items stored in a vault with metadata (CID, size, type, date added).
-
-**Example output:**
-```json
-{
-  "document.pdf": {
-    "cid": "bafybei...",
-    "sha256": "33461e29...",
-    "bytes": 1234567,
-    "type": "application/pdf",
-    "added": "2026-02-15T11:00:34.505Z"
-  }
-}
-```
-
-### Get Vault Item
-
-```bash
-./scripts/vaults/get-vault-item.sh <vault-id> <item-name> <output-file>
-```
-
-Retrieve an item from the vault and save to a file.
-
-**Example:**
-```bash
-./scripts/vaults/get-vault-item.sh my-vault document.pdf /tmp/retrieved.pdf
-```
-
-### Remove Vault Item
-
-```bash
-./scripts/vaults/remove-vault-item.sh <vault-id> <item-name>
-```
-
-Remove an item from the vault.
-
-**Example:**
-```bash
-./scripts/vaults/remove-vault-item.sh my-vault old-backup.zip
-```
-
-### Vault Member Management
-
-Vaults support multi-party access - share vaults with other DIDs.
-
-**Add Member:**
-```bash
-./scripts/vaults/add-vault-member.sh <vault-id> <member-did>
-```
-
-**List Members:**
-```bash
-./scripts/vaults/list-vault-members.sh <vault-id>
-```
-
-**Remove Member:**
-```bash
-./scripts/vaults/remove-vault-member.sh <vault-id> <member-did>
-```
-
-**Example workflow (shared project vault):**
-```bash
-# Create shared vault
-./scripts/vaults/create-vault.sh --alias project-vault
-
-# Add team members
-./scripts/vaults/add-vault-member.sh project-vault did:cid:bagaaiera...  # Alice
-./scripts/vaults/add-vault-member.sh project-vault did:cid:bagaaierb...  # Bob
-
-# Verify members
-./scripts/vaults/list-vault-members.sh project-vault
-
-# Add project files
-./scripts/vaults/add-vault-item.sh project-vault specs.pdf
-./scripts/vaults/add-vault-item.sh project-vault design.fig
-```
-
-**Note:** Members have full read/write access to vault contents. Use `--secret-members` flag when creating the vault if members shouldn't see each other.
-
 ## Groups
 
 Manage collections of DIDs for access control, multi-party operations, and organizational structure.
@@ -783,92 +643,6 @@ Examples:
 - **Access control** - Encrypt files for a group, all members can decrypt
 - **Team management** - Organize DIDs by role or project
 - **Multi-party workflows** - Define who can participate in group operations
-
-## Vault Backups
-
-Encrypted, distributed backups to your DID vault.
-
-### Setup
-
-1. Create backup vault:
-   ```bash
-   npx @didcid/keymaster create-vault --name backup
-   ```
-
-2. Configure exclusions:
-   ```bash
-   cp references/backup-templates/workspace.backup-ignore ~/clawd/.backup-ignore
-   cp references/backup-templates/config.backup-ignore ~/.openclaw/.backup-ignore
-   ```
-
-3. Test backup:
-   ```bash
-   ./scripts/backup/backup-to-vault.sh
-   ```
-
-### Manual Backup
-
-```bash
-./scripts/backup/backup-to-vault.sh
-```
-
-Backs up:
-- Workspace (`~/clawd`) → `workspace.zip`
-- Config (`~/.openclaw`) → `config.zip`
-- Memory database (`hexmem.db`)
-
-### Verify Backup
-
-```bash
-npx @didcid/keymaster list-vault-items backup
-./scripts/backup/verify-backup.sh  # Full integrity check
-```
-
-### Restore from Backup
-
-**Automated restore (recommended):**
-```bash
-./scripts/backup/restore-from-vault.sh [target-dir]
-```
-
-Retrieves and extracts all backup items (workspace.zip, config.zip, hexmem.db) from your vault.
-
-**Manual restore:**
-```bash
-npx @didcid/keymaster get-vault-item backup workspace.zip workspace.zip
-npx @didcid/keymaster get-vault-item backup config.zip config.zip
-npx @didcid/keymaster get-vault-item backup hexmem.db hexmem.db
-
-unzip workspace.zip
-unzip config.zip -d ~/.openclaw
-```
-
-### Complete Disaster Recovery
-
-If you've lost everything but have your 12-word mnemonic:
-
-```bash
-./scripts/backup/disaster-recovery.sh "word1 word2 ... word12" [target-dir]
-```
-
-This single command:
-1. Creates wallet from mnemonic
-2. Recovers wallet data (identities, aliases) from seed bank
-3. Restores workspace, config, and memory from vault
-
-Requires `ARCHON_PASSPHRASE` to be set.
-
-### Gatekeeper Options
-
-**Public gatekeeper** (default): `https://archon.technology`
-- No setup required
-- 10MB file size limit
-
-**Local node** (for large backups):
-```bash
-# Run local Archon node, then update ~/.archon.env:
-export ARCHON_GATEKEEPER_URL="http://localhost:4224"
-```
 
 ## Authorization
 
@@ -1198,8 +972,6 @@ This skill accesses sensitive data by design:
 |------|---------|---------|
 | `~/.archon.wallet.json` | All scripts | Contains encrypted private keys |
 | `~/.archon.env` | All scripts | Contains `ARCHON_PASSPHRASE` for non-interactive use |
-| `~/clawd/**` | `backup-to-vault.sh` | Archives workspace to encrypted vault |
-| `~/.openclaw/**` | `backup-to-vault.sh` | Archives OpenClaw config to encrypted vault |
 | `~/.clawstr/secret.key` | Nostr scripts | Stores derived Nostr private key |
 
 ### Environment Variables
@@ -1213,19 +985,6 @@ The following are set in `~/.archon.env`:
 ```bash
 chmod 600 ~/.archon.env  # Owner read/write only
 ```
-
-### Backup Security Model
-
-The backup scripts (`backup-to-vault.sh`, `restore-from-vault.sh`) archive broad regions of your filesystem:
-
-1. **What gets backed up**: Contents of `~/clawd` and `~/.openclaw`, minus items in `.backup-ignore`
-2. **Encryption**: Archives are encrypted with your DID before transmission
-3. **Storage**: Encrypted data stored on Archon gatekeeper / hyperswarm DHT
-4. **Access**: Only you (or vault members you add) can decrypt
-
-To exclude sensitive files from backup, edit:
-- `~/clawd/.backup-ignore`
-- `~/.openclaw/.backup-ignore`
 
 ### Network Transmission
 
@@ -1271,21 +1030,8 @@ chmod 600 ~/.archon.env
 **"Recipient can't decrypt":**
 - Use correct recipient DID (not alias on their side)
 
-### Backup
-
-**"File too large" (>10MB on public gatekeeper):**
-- Run local Archon node: `export ARCHON_GATEKEEPER_URL="http://localhost:4224"`
-- OR exclude more files via `.backup-ignore`
-
-**"Vault not found":**
-```bash
-npx @didcid/keymaster list-vaults
-npx @didcid/keymaster create-vault --name backup
-```
-
 ## References
 
 - Archon documentation: https://github.com/archetech/archon
 - Keymaster reference: https://github.com/archetech/archon/tree/main/keymaster
 - W3C DID specification: https://www.w3.org/TR/did-core/
-- Backup procedure: https://morningstar-daemon.github.io/archon/backup-procedure

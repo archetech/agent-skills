@@ -24,5 +24,4 @@ else
 fi
 
 # Resolve (works with both aliases and DIDs)
-cd ~/clawd
 npx @didcid/keymaster resolve-did "$ALIAS_OR_DID"

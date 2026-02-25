@@ -44,7 +44,6 @@ echo ""
 TEMP_FILE="${FILE}.signing.tmp"
 
 # Sign file (outputs to stdout)
-cd ~/clawd
 if npx @didcid/keymaster sign-file "$FILE" > "$TEMP_FILE" 2>&1; then
     # Replace original with signed version
     mv "$TEMP_FILE" "$FILE"

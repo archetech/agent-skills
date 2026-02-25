@@ -29,7 +29,6 @@ echo "Output: $OUTPUT_FILE"
 echo ""
 
 # Decrypt (outputs to stdout, we redirect)
-cd ~/clawd
 if npx @didcid/keymaster decrypt-did "$ENCRYPTED_DID" > "$OUTPUT_FILE" 2>&1; then
     FILE_SIZE=$(du -h "$OUTPUT_FILE" | cut -f1)
     

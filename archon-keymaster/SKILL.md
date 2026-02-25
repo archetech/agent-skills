@@ -1,6 +1,53 @@
 ---
 name: archon-keymaster
 description: Complete Archon DID toolkit - identity management, verifiable credentials, encrypted messaging (dmail), Nostr integration, file encryption/signing, aliasing, vault management, encrypted backups, authorization (challenge/response), groups, and cryptographic polls. Use for any Archon/DID operations including creating identities, issuing/accepting verifiable credentials, sending encrypted messages between DIDs, deriving Nostr keypairs from DID, encrypting/signing files, managing DID aliases, creating/managing vaults, sharing vaults with multiple DIDs, backing up to distributed vaults, performing DID-based challenge/response authorization, managing DID groups for access control, or running cryptographically verifiable polls.
+permissions:
+  filesystem:
+    read:
+      - "~/.archon.env"
+      - "~/.archon.wallet.json"
+      - "~/clawd/**"
+      - "~/.openclaw/**"
+    write:
+      - "~/.archon.env"
+      - "~/.archon.wallet.json"
+      - "~/.clawstr/**"
+  network:
+    - "archon.technology:443"
+    - "localhost:4224"
+    - "hyperswarm DHT"
+  environment:
+    - "ARCHON_WALLET_PATH"
+    - "ARCHON_PASSPHRASE"
+    - "ARCHON_GATEKEEPER_URL"
+sensitive_data:
+  - type: "cryptographic_keys"
+    location: "~/.archon.wallet.json"
+    description: "Encrypted wallet containing DID private keys"
+  - type: "passphrase"
+    location: "~/.archon.env"
+    description: "Wallet encryption passphrase in environment file"
+  - type: "workspace_backup"
+    location: "~/clawd/**"
+    description: "Backup scripts archive entire workspace to DID vault"
+  - type: "config_backup"
+    location: "~/.openclaw/**"
+    description: "Backup scripts archive OpenClaw config to DID vault"
+security_notes: |
+  This skill handles cryptographic identity and backup operations:
+  
+  1. **Passphrase in environment**: ARCHON_PASSPHRASE is stored in ~/.archon.env
+     for non-interactive script execution. The file should be chmod 600.
+  
+  2. **Backup scope**: backup-to-vault.sh archives ~/clawd and ~/.openclaw
+     to your encrypted DID vault. Review .backup-ignore files to exclude
+     sensitive items you don't want backed up.
+  
+  3. **Network transmission**: Data is encrypted before transmission to
+     Archon gatekeeper/hyperswarm. Only you (or vault members) can decrypt.
+  
+  4. **Key recovery**: Your 12-word mnemonic is the master recovery key.
+     Store it offline, never in digital form.
 ---
 
 # Archon Keymaster - Complete DID Toolkit
@@ -1154,12 +1201,59 @@ Signed files include proof:
 
 ## Security Notes
 
+### Cryptographic Security
 - **Mnemonic is master key** - Store offline, write down, never digital
 - **Passphrase encrypts wallet** - Protects wallet.json on disk
 - **Aliases are local** - Not shared, fully decentralized
 - **Dmail is end-to-end encrypted** - Only sender/recipients can read
 - **Signatures are non-repudiable** - Can't deny creating valid signature
 - **Backups persist** - As long as any hyperswarm node retains them
+
+### Data Access Disclosure
+
+This skill accesses sensitive data by design:
+
+| Data | Scripts | Purpose |
+|------|---------|---------|
+| `~/.archon.wallet.json` | All scripts | Contains encrypted private keys |
+| `~/.archon.env` | All scripts | Contains `ARCHON_PASSPHRASE` for non-interactive use |
+| `~/clawd/**` | `backup-to-vault.sh` | Archives workspace to encrypted vault |
+| `~/.openclaw/**` | `backup-to-vault.sh` | Archives OpenClaw config to encrypted vault |
+| `~/.clawstr/secret.key` | Nostr scripts | Stores derived Nostr private key |
+
+### Environment Variables
+
+The following are set in `~/.archon.env`:
+- `ARCHON_WALLET_PATH` - Path to wallet file
+- `ARCHON_PASSPHRASE` - Wallet decryption passphrase (sensitive!)
+- `ARCHON_GATEKEEPER_URL` - Optional, defaults to public gatekeeper
+
+**Important**: `~/.archon.env` contains your passphrase in plaintext for script automation. Ensure:
+```bash
+chmod 600 ~/.archon.env  # Owner read/write only
+```
+
+### Backup Security Model
+
+The backup scripts (`backup-to-vault.sh`, `restore-from-vault.sh`) archive broad regions of your filesystem:
+
+1. **What gets backed up**: Contents of `~/clawd` and `~/.openclaw`, minus items in `.backup-ignore`
+2. **Encryption**: Archives are encrypted with your DID before transmission
+3. **Storage**: Encrypted data stored on Archon gatekeeper / hyperswarm DHT
+4. **Access**: Only you (or vault members you add) can decrypt
+
+To exclude sensitive files from backup, edit:
+- `~/clawd/.backup-ignore`
+- `~/.openclaw/.backup-ignore`
+
+### Network Transmission
+
+Scripts connect to:
+- `https://archon.technology` - Public gatekeeper (default)
+- `localhost:4224` - Local gatekeeper (if configured)
+- Hyperswarm DHT - Distributed storage network
+
+All transmitted data is encrypted. No plaintext secrets leave your machine
 
 ## Troubleshooting
 

@@ -5,24 +5,30 @@ set -e
 
 CONFIG_FILE="${ARCHON_CASHU_CONFIG:-$HOME/.config/hex/archon-cashu.env}"
 
-# Defaults
-DEFAULT_CASHU_BIN="/home/sat/.cache/pypoetry/virtualenvs/cashu-Mr2KwNb2-py3.12/bin/cashu"
-DEFAULT_MINT_URL="https://bolverker.com/cashu"
-DEFAULT_LNBITS_ENV="$HOME/.config/hex/lnbits.env"
-DEFAULT_ARCHON_CONFIG_DIR="$HOME/clawd/archon-personal"
-DEFAULT_ARCHON_WALLET_PATH="$HOME/clawd/archon-personal/wallet.json"
-DEFAULT_ARCHON_PASSPHRASE="hex-daemon-lightning-hive-2026"
+# Defaults — auto-discover cashu binary
+DEFAULT_CASHU_BIN="$(command -v cashu 2>/dev/null || echo "")"
+DEFAULT_MINT_URL="https://mint.minibits.cash/Bitcoin"
+DEFAULT_LNBITS_ENV=""
+DEFAULT_ARCHON_CONFIG_DIR="${ARCHON_CONFIG_DIR:-}"
+DEFAULT_ARCHON_WALLET_PATH=""
+DEFAULT_ARCHON_PASSPHRASE="${ARCHON_PASSPHRASE:-}"
 
 create_default_config() {
     mkdir -p "$(dirname "$CONFIG_FILE")"
     cat > "$CONFIG_FILE" << EOF
 # Archon Cashu Wallet Configuration
-CASHU_BIN="$DEFAULT_CASHU_BIN"
-CASHU_MINT_URL="$DEFAULT_MINT_URL"
-LNBITS_ENV="$DEFAULT_LNBITS_ENV"
-ARCHON_CONFIG_DIR="$DEFAULT_ARCHON_CONFIG_DIR"
-ARCHON_WALLET_PATH="$DEFAULT_ARCHON_WALLET_PATH"
-ARCHON_PASSPHRASE="$DEFAULT_ARCHON_PASSPHRASE"
+# CASHU_BIN — path to cashu CLI (auto-detected if on PATH, or: pip install cashu)
+CASHU_BIN="${DEFAULT_CASHU_BIN}"
+# CASHU_MINT_URL — default Cashu mint
+CASHU_MINT_URL="${DEFAULT_MINT_URL}"
+# LNBITS_ENV — optional, for LNbits integration
+LNBITS_ENV=""
+# ARCHON_CONFIG_DIR — path to your Archon/keymaster wallet directory
+ARCHON_CONFIG_DIR="${DEFAULT_ARCHON_CONFIG_DIR}"
+# ARCHON_WALLET_PATH — path to wallet.json (leave empty to use ARCHON_CONFIG_DIR default)
+ARCHON_WALLET_PATH=""
+# ARCHON_PASSPHRASE — wallet passphrase (or set via environment variable)
+ARCHON_PASSPHRASE=""
 EOF
     chmod 600 "$CONFIG_FILE"
     echo "Created config at $CONFIG_FILE"
@@ -33,6 +39,16 @@ load_config() {
         create_default_config
     fi
     source "$CONFIG_FILE"
+    
+    # Auto-discover cashu if not configured
+    if [ -z "$CASHU_BIN" ]; then
+        CASHU_BIN="$(command -v cashu 2>/dev/null || echo "")"
+    fi
+    if [ -z "$CASHU_BIN" ] || [ ! -x "$CASHU_BIN" ]; then
+        echo "ERROR: cashu CLI not found. Install with: pip install cashu" >&2
+        echo "Then set CASHU_BIN in $CONFIG_FILE or ensure 'cashu' is on your PATH." >&2
+        return 1 2>/dev/null || exit 1
+    fi
     
     # Export for archon scripts
     export ARCHON_CONFIG_DIR ARCHON_WALLET_PATH ARCHON_PASSPHRASE

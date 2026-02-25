@@ -14,7 +14,6 @@ fi
 echo "=== Your DID Aliases ==="
 echo ""
 
-cd ~/clawd
 npx @didcid/keymaster list-aliases
 
 echo ""

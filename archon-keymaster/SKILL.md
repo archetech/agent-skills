@@ -7,9 +7,13 @@ metadata:
       env:
         - ARCHON_WALLET_PATH
         - ARCHON_PASSPHRASE
+        - ARCHON_GATEKEEPER_URL
       bins:
         - node
         - npx
+      anyBins:
+        - jq
+        - openssl
     primaryEnv: ARCHON_PASSPHRASE
     emoji: "🔐"
 ---

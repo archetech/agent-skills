@@ -27,7 +27,6 @@ else
 fi
 
 # Add alias
-cd ~/clawd
 npx @didcid/keymaster add-alias "$ALIAS" "$DID"
 
 echo ""

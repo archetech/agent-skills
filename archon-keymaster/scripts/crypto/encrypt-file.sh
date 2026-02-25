@@ -34,7 +34,6 @@ else
 fi
 
 # Resolve recipient name to DID if needed (suppress verbose output)
-cd ~/clawd
 RECIPIENT_DID=$(npx @didcid/keymaster resolve-did "$RECIPIENT" 2>/dev/null | head -1 || echo "$RECIPIENT")
 
 # If resolution gave us JSON, just use the original input

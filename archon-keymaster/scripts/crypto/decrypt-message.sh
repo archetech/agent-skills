@@ -26,7 +26,6 @@ echo "Decrypting message..."
 echo ""
 
 # Decrypt
-cd ~/clawd
 DECRYPTED=$(npx @didcid/keymaster decrypt-did "$ENCRYPTED_DID")
 
 echo "✓ Message decrypted"

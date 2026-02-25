@@ -24,7 +24,6 @@ else
 fi
 
 # Remove alias
-cd ~/clawd
 npx @didcid/keymaster remove-alias "$ALIAS"
 
 echo ""

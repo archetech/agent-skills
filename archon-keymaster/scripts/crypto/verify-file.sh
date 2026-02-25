@@ -33,7 +33,6 @@ echo "Verifying: $FILE"
 echo ""
 
 # Verify file
-cd ~/clawd
 if npx @didcid/keymaster verify-file "$FILE" 2>&1 | tee /tmp/verify-output.txt; then
     echo ""
     echo "✓ Signature valid"

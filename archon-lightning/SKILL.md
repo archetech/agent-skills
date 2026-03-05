@@ -157,9 +157,7 @@ The script verifies the payment settled and outputs a clear success/failure mess
 
 **Why verification matters:**
 - Payment hash ≠ success (can fail after returning hash)
-- Prevents false confirmation
-- Avoids double payments
-- Protects against lost funds
+- Prevents false confirmation (thinking you paid when you didn't)
 
 ### Verify Payment Status
 

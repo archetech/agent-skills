@@ -205,12 +205,18 @@ Publish your Lightning endpoint to your DID document so others can pay you:
 ./scripts/lightning/publish-lightning.sh
 ```
 
-Your DID document now includes:
+Your DID document now includes a Lightning service entry:
 ```json
 {
-  "id": "did:cid:bagaaiera...",
-  "lightning": {
-    "endpoint": "https://..."
+  "didDocument": {
+    "id": "did:cid:bagaaiera...",
+    "service": [
+      {
+        "id": "did:cid:bagaaiera...#lightning",
+        "type": "Lightning",
+        "serviceEndpoint": "http://...onion:4222/invoice/bagaaiera..."
+      }
+    ]
   }
 }
 ```

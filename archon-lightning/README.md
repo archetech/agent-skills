@@ -54,10 +54,10 @@ Your DID now has a Lightning wallet. That's it.
 
 ```bash
 ./scripts/lightning/lightning-invoice.sh 1000 "Coffee payment"
-# Returns BOLT11 invoice: lnbc10u1...
+# Returns: {"paymentRequest": "lnbc10u1...", "paymentHash": "..."}
 ```
 
-Share that invoice. When paid, sats arrive in your wallet instantly.
+Extract the `paymentRequest` value and share it. When paid, sats arrive in your wallet instantly.
 
 ### Pay an Invoice
 

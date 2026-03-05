@@ -79,10 +79,8 @@ Examples:
 Returns current balance in satoshis.
 
 Example output:
-```json
-{
-  "balance": 50000
-}
+```
+2257 sats
 ```
 
 ## Receiving Payments
@@ -100,17 +98,18 @@ Creates a BOLT11 invoice to receive payment.
 - `memo` - Description/memo for the invoice
 - `id` - (optional) DID alias, defaults to current identity
 
-**Examples:**
+**Example:**
 ```bash
-# Create invoice for 1000 sats
 ./scripts/lightning/lightning-invoice.sh 1000 "Coffee payment"
-# Returns: lnbc10u1p...
-
-# Invoice from specific DID
-./scripts/lightning/lightning-invoice.sh 5000 "Consulting fee" work-persona
 ```
 
-**Output:** BOLT11 invoice string (e.g., `lnbc10u1p...`)
+**Output:**
+```json
+{
+  "paymentRequest": "lnbc10u1p...",
+  "paymentHash": "a3f7b8c9..."
+}
+```
 
 Share this invoice with the payer. They can:
 - Scan as QR code
@@ -231,24 +230,16 @@ Send sats to a Lightning Address, DID, or alias.
 Show all Lightning payments (sent and received).
 
 **Example output:**
-```json
-[
-  {
-    "type": "sent",
-    "amount": 1000,
-    "timestamp": "2026-03-05T10:15:00Z",
-    "paymentHash": "a3f7b8c9...",
-    "settled": true
-  },
-  {
-    "type": "received",
-    "amount": 5000,
-    "timestamp": "2026-03-05T09:30:00Z",
-    "invoice": "lnbc50u1p...",
-    "settled": true
-  }
-]
 ```
+2026/03/05 11:17:38  -100 sats "Payment memo"
+2026/03/04 17:08:14  +20 sats "Received payment"
+2026/03/03 17:16:31  +25 sats "Test invoice"
+```
+
+Format: `YYYY/MM/DD HH:MM:SS  [+/-]amount sats ["memo"]`
+- Negative amounts = payments sent
+- Positive amounts = payments received
+- Memo is optional
 
 ## DID Integration
 

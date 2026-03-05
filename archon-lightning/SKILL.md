@@ -394,6 +394,30 @@ HASH=$(echo "$RESULT" | jq -r .paymentHash)
 ./scripts/lightning/unpublish-lightning.sh
 ```
 
+### Example 6: Sending Invoice via Dmail
+
+```bash
+# Alice creates an invoice for 5000 sats
+INVOICE_JSON=$(npx @didcid/keymaster lightning-invoice 5000 "Consulting fee")
+INVOICE=$(echo "$INVOICE_JSON" | jq -r .paymentRequest)
+
+# Alice sends the invoice to Bob via dmail
+npx @didcid/keymaster send-dmail \
+  "did:cid:bob..." \
+  "Invoice for consulting work" \
+  "Please pay this invoice: $INVOICE"
+
+# Bob receives the dmail, extracts the invoice, and pays
+npx @didcid/keymaster lightning-pay "$INVOICE"
+# ✅ Payment confirmed
+
+# Alice checks her payment history
+npx @didcid/keymaster lightning-payments
+# Shows the received payment
+```
+
+**Why this matters:** Agents can request payment without needing email, phone numbers, or centralized messaging platforms. Just DIDs + Lightning + dmail.
+
 ## Environment Setup
 
 All scripts require:

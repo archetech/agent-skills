@@ -125,19 +125,21 @@ Share this invoice with the payer. They can:
 ./scripts/lightning/lightning-pay.sh <bolt11> [id]
 ```
 
-Pay a BOLT11 invoice.
+Pay a BOLT11 invoice with automatic payment verification.
 
 **Arguments:**
 - `bolt11` - BOLT11 invoice string
 - `id` - (optional) DID alias to pay from
 
-**Returns:** Payment hash (NOT confirmation of success!)
+**Returns:** Combined payment result with verification status
 
 **Example:**
 ```bash
 ./scripts/lightning/lightning-pay.sh lnbc10u1p...
-# {"paymentHash": "a3f7b8c9..."}
+# {"paymentHash": "a3f7b8c9...", "paid": true, "preimage": "..."}
 ```
+
+The script automatically calls `lightning-check` after paying to verify the payment settled.
 
 ### ⚠️ Payment Verification Pattern (CRITICAL)
 

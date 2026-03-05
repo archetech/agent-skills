@@ -210,8 +210,7 @@ Your DID document now includes:
 {
   "id": "did:cid:bagaaiera...",
   "lightning": {
-    "endpoint": "https://...",
-    "address": "user@domain.com"
+    "endpoint": "https://..."
   }
 }
 ```

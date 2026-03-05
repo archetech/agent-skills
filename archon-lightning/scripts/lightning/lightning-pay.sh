@@ -11,5 +11,5 @@ source ~/.archon.env
 result=$(npx @didcid/keymaster lightning-pay "$@")
 hash=$(echo "$result" | jq -r .paymentHash)
 
-# Verify payment settled
+# Verify payment settled and return combined result
 npx @didcid/keymaster lightning-check "$hash" "${2:-}"

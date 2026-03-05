@@ -9,6 +9,7 @@ Agent skills for [Archon](https://archon.technology) — decentralized identity 
 | [archon-keymaster](./archon-keymaster/) | Core DID toolkit — identity management, verifiable credentials, encrypted messaging (dmail), Nostr integration, file encryption/signing, authorization, groups, and polls |
 | [archon-vault](./archon-vault/) | Encrypted distributed storage — vault management, multi-party access, workspace/config backups, disaster recovery |
 | [archon-cashu](./archon-cashu/) | DID-integrated ecash — Cashu tokens locked to DIDs (P2PK), LNBITS integration |
+| [archon-lightning](./archon-lightning/) | Lightning Network payments — wallet creation, invoice generation/payment, Lightning Address zaps, payment verification, DID integration |
 
 ## Installation
 

@@ -287,14 +287,6 @@ All scripts wrap the [@didcid/keymaster](https://github.com/archetech/archon/tre
 - Banks (no traditional finance involved)
 - Payment processors (direct payments)
 
-**Threat model:**
-- ✅ **Payment censorship:** Lightning is permissionless
-- ✅ **Custody risk:** Non-custodial, you control funds
-- ✅ **Privacy:** Onion-routed payments
-- ✅ **Fake payments:** Cryptographic proof of payment
-- ⚠️ **Key compromise:** If someone gets your keys, they control your funds
-- ⚠️ **Channel force-close:** Funds locked until on-chain settlement
-
 ## Comparison to Other Systems
 
 | Feature | archon-lightning | Custodial Wallet | Credit Card | Bank Wire |
@@ -318,12 +310,6 @@ All scripts wrap the [@didcid/keymaster](https://github.com/archetech/archon/tre
 - ✅ Payment verification
 - ✅ Balance checking and history
 - ✅ DID document integration
-
-**Coming soon:**
-- 🔜 Multi-DID wallet management (one node, many DIDs)
-- 🔜 Subscription payments (recurring Lightning invoices)
-- 🔜 Payment streaming (continuous micropayments)
-- 🔜 Lightning Service Authentication Tokens (LSAT)
 
 ## Contributing
 

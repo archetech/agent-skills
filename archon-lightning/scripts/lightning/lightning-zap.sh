@@ -5,7 +5,6 @@ set -euo pipefail
 # Usage: ./lightning-zap.sh <recipient> <amount> [memo] [id]
 # recipient: Lightning Address (user@domain.com), DID, or alias
 
-source ~/.nvm/nvm.sh
 source ~/.archon.env
 
 npx @didcid/keymaster lightning-zap "$@"

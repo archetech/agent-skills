@@ -5,7 +5,6 @@ set -euo pipefail
 # Usage: ./lightning-check.sh <paymentHash> [id]
 # Returns: {"paid": true|false, ...}
 
-source ~/.nvm/nvm.sh
 source ~/.archon.env
 
 npx @didcid/keymaster lightning-check "$@"

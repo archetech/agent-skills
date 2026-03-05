@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# lightning-pay.sh - Pay BOLT11 invoice
+# lightning-pay.sh - Pay BOLT11 invoice with automatic verification
 # Usage: ./lightning-pay.sh <bolt11> [id]
-# Returns: {"paymentHash": "..."} - ALWAYS VERIFY WITH lightning-check.sh!
+# Returns: {"paymentHash": "...", "paid": true/false, "preimage": "..."}
 
-source ~/.nvm/nvm.sh
 source ~/.archon.env
 
-npx @didcid/keymaster lightning-pay "$@"
+# Pay the invoice
+result=$(npx @didcid/keymaster lightning-pay "$@")
+hash=$(echo "$result" | jq -r .paymentHash)
+
+# Verify payment settled
+npx @didcid/keymaster lightning-check "$hash" "${2:-}"

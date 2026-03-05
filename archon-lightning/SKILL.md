@@ -50,7 +50,7 @@ All created by `archon-keymaster` setup. If you don't have Archon configured yet
 This skill handles Lightning Network payments:
 
 1. **Non-custodial**: You control your Lightning node and private keys
-2. **Payment verification is critical**: Always verify payments with `lightning-check` (see Payment Verification Pattern below)
+2. **Payment verification is built-in**: `lightning-pay.sh` automatically verifies payments; if using keymaster directly, you must verify manually with `lightning-check` (see Payment Verification Pattern below)
 3. **Environment access**: Scripts source `~/.archon.env` for wallet access
 4. **Network connectivity**: Connects to Lightning Network via Archon gatekeeper
 
@@ -143,15 +143,31 @@ Pay a BOLT11 invoice.
 
 **The payment hash is NOT proof of payment!** Lightning payments can fail, time out, or remain pending.
 
-**Always verify payments settled:**
+**Our `lightning-pay.sh` script handles verification automatically:**
+
+```bash
+# Automatic verification built-in
+result=$(./scripts/lightning/lightning-pay.sh lnbc10u1p...)
+# Returns: {"paymentHash": "...", "paid": true, "preimage": "..."}
+
+# Check result
+if [ "$(echo "$result" | jq -r .paid)" = "true" ]; then
+  echo "✅ Payment confirmed"
+else
+  echo "❌ Payment failed"
+  exit 1
+fi
+```
+
+**If using `keymaster` directly, you MUST verify manually:**
 
 ```bash
 # Step 1: Pay invoice
-result=$(./scripts/lightning/lightning-pay.sh lnbc10u1p...)
+result=$(npx @didcid/keymaster lightning-pay lnbc10u1p...)
 hash=$(echo "$result" | jq -r .paymentHash)
 
 # Step 2: VERIFY payment settled
-status=$(./scripts/lightning/lightning-check.sh "$hash" | jq -r .paid)
+status=$(npx @didcid/keymaster lightning-check "$hash" | jq -r .paid)
 
 # Step 3: Check result
 if [ "$status" = "true" ]; then
@@ -410,11 +426,10 @@ HASH=$(echo "$RESULT" | jq -r .paymentHash)
 All scripts require:
 
 ```bash
-source ~/.nvm/nvm.sh   # Load Node.js (adds npx to PATH)
 source ~/.archon.env   # Load wallet path and passphrase
 ```
 
-These are automatically sourced by the wrapper scripts.
+This is automatically sourced by the wrapper scripts. `npx` is used to run keymaster, so no nvm sourcing is needed.
 
 **Environment variables (`~/.archon.env`):**
 - `ARCHON_WALLET_PATH` - Path to your wallet file
@@ -559,9 +574,14 @@ HASH=$(./scripts/lightning/lightning-pay.sh lnbc10u1p... | jq -r .paymentHash)
 
 ### "Command not found: npx"
 
+Ensure Node.js is installed and in your PATH:
+
 ```bash
-source ~/.nvm/nvm.sh
+node --version  # Should show v16 or newer
+npx --version   # Should show npm version
 ```
+
+If not installed, install Node.js via your package manager or from https://nodejs.org
 
 ### "Cannot read wallet"
 

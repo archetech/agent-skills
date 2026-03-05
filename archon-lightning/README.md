@@ -10,7 +10,7 @@ Send and receive Bitcoin over Lightning. No custody. No permission. Just your DI
 
 - ⚡ **Lightning wallets for DIDs** - Each DID can have its own Lightning wallet
 - 💸 **Send/receive sats** - Pay BOLT11 invoices or create invoices to receive payments
-- ⚡ **Lightning Address zaps** - Send to `user@domain.com` Lightning Addresses
+- ⚡ **Lightning Address zaps** - Send to `user@domain.com` Lightning Addresses, DIDs, or aliases
 - ✅ **Payment verification** - Cryptographic proof that payments settled
 - 📊 **Payment history** - Track all Lightning transactions
 - 🔗 **DID integration** - Publish your Lightning endpoint to your DID document
@@ -63,16 +63,10 @@ Share that invoice. When paid, sats arrive in your wallet instantly.
 
 ```bash
 ./scripts/lightning/lightning-pay.sh lnbc10u1...
-# Returns payment hash
+# Returns: {"paymentHash": "...", "paid": true, "preimage": "..."}
 ```
 
-**Critical:** Always verify payments settled!
-
-```bash
-HASH=$(./scripts/lightning/lightning-pay.sh lnbc10u1... | jq -r .paymentHash)
-./scripts/lightning/lightning-check.sh "$HASH"
-# {"paid": true} means payment confirmed
-```
+Payment verification is built-in - the script automatically checks that payment settled before returning.
 
 ### Zap via Lightning Address
 
@@ -148,17 +142,32 @@ A payment hash does NOT mean the payment succeeded. Lightning payments can:
 - Fail (no route, insufficient balance)
 - Time out (invoice expired)
 
-**Always verify with `lightning-check`:**
+**Our `lightning-pay.sh` script handles this automatically:**
+
+```bash
+# ✅ Automatic verification built-in
+result=$(./scripts/lightning/lightning-pay.sh lnbc10u1...)
+# Returns: {"paymentHash": "...", "paid": true, "preimage": "..."}
+
+if [ "$(echo "$result" | jq -r .paid)" = "true" ]; then
+  echo "✅ Payment confirmed"
+else
+  echo "❌ Payment failed"
+  exit 1
+fi
+```
+
+**If using keymaster directly, you MUST verify manually:**
 
 ```bash
 # ❌ WRONG - Assumes payment hash = success
-result=$(./scripts/lightning/lightning-pay.sh lnbc10u1...)
+result=$(npx @didcid/keymaster lightning-pay lnbc10u1...)
 echo "Payment sent!" # NOPE!
 
 # ✅ CORRECT - Verify payment settled
-result=$(./scripts/lightning/lightning-pay.sh lnbc10u1...)
+result=$(npx @didcid/keymaster lightning-pay lnbc10u1...)
 hash=$(echo "$result" | jq -r .paymentHash)
-status=$(./scripts/lightning/lightning-check.sh "$hash" | jq -r .paid)
+status=$(npx @didcid/keymaster lightning-check "$hash" | jq -r .paid)
 
 if [ "$status" = "true" ]; then
   echo "✅ Payment confirmed"

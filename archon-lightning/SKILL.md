@@ -131,15 +131,16 @@ Pay a BOLT11 invoice with automatic payment verification.
 - `bolt11` - BOLT11 invoice string
 - `id` - (optional) DID alias to pay from
 
-**Returns:** Combined payment result with verification status
+**Output:** Success or failure message with exit code
 
 **Example:**
 ```bash
 ./scripts/lightning/lightning-pay.sh lnbc10u1p...
-# {"paymentHash": "a3f7b8c9...", "paid": true, "preimage": "..."}
+# ✅ Payment confirmed
+# (exits 0 on success, 1 on failure)
 ```
 
-The script automatically calls `lightning-check` after paying to verify the payment settled.
+The script automatically verifies the payment settled before outputting success.
 
 ### ⚠️ Payment Verification Pattern (CRITICAL)
 
@@ -148,41 +149,17 @@ The script automatically calls `lightning-check` after paying to verify the paym
 **Our `lightning-pay.sh` script handles verification automatically:**
 
 ```bash
-# Automatic verification built-in
-result=$(./scripts/lightning/lightning-pay.sh lnbc10u1p...)
-# Returns: {"paymentHash": "...", "paid": true, "preimage": "..."}
-
-# Check result
-if [ "$(echo "$result" | jq -r .paid)" = "true" ]; then
-  echo "✅ Payment confirmed"
-else
-  echo "❌ Payment failed"
-  exit 1
-fi
+./scripts/lightning/lightning-pay.sh lnbc10u1p...
+# ✅ Payment confirmed
+# (or "❌ Payment failed or pending" + exit 1)
 ```
 
-**If using `keymaster` directly, you MUST verify manually:**
+The script verifies the payment settled and outputs a clear success/failure message. No manual checking needed.
 
-```bash
-# Step 1: Pay invoice
-result=$(npx @didcid/keymaster lightning-pay lnbc10u1p...)
-hash=$(echo "$result" | jq -r .paymentHash)
-
-# Step 2: VERIFY payment settled
-status=$(npx @didcid/keymaster lightning-check "$hash" | jq -r .paid)
-
-# Step 3: Check result
-if [ "$status" = "true" ]; then
-  echo "✅ Payment confirmed"
-else
-  echo "❌ Payment failed or pending"
-  exit 1
-fi
-```
-
-**Why this matters:**
-- Prevents false confirmation (thinking you paid when you didn't)
-- Avoids double payments (retrying when payment succeeded)
+**Why verification matters:**
+- Payment hash ≠ success (can fail after returning hash)
+- Prevents false confirmation
+- Avoids double payments
 - Protects against lost funds
 
 ### Verify Payment Status

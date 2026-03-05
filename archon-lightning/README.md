@@ -63,10 +63,11 @@ Share that invoice. When paid, sats arrive in your wallet instantly.
 
 ```bash
 ./scripts/lightning/lightning-pay.sh lnbc10u1...
-# Returns: {"paymentHash": "...", "paid": true, "preimage": "..."}
+# ✅ Payment confirmed
+# (or "❌ Payment failed or pending" if payment didn't settle)
 ```
 
-Payment verification is built-in - the script automatically checks that payment settled before returning.
+Payment verification is built-in - the script automatically verifies before outputting success.
 
 ### Zap via Lightning Address
 
@@ -145,42 +146,12 @@ A payment hash does NOT mean the payment succeeded. Lightning payments can:
 **Our `lightning-pay.sh` script handles this automatically:**
 
 ```bash
-# ✅ Automatic verification built-in
-result=$(./scripts/lightning/lightning-pay.sh lnbc10u1...)
-# Returns: {"paymentHash": "...", "paid": true, "preimage": "..."}
-
-if [ "$(echo "$result" | jq -r .paid)" = "true" ]; then
-  echo "✅ Payment confirmed"
-else
-  echo "❌ Payment failed"
-  exit 1
-fi
+./scripts/lightning/lightning-pay.sh lnbc10u1...
+# ✅ Payment confirmed
+# (or exits with error if payment failed)
 ```
 
-**If using keymaster directly, you MUST verify manually:**
-
-```bash
-# ❌ WRONG - Assumes payment hash = success
-result=$(npx @didcid/keymaster lightning-pay lnbc10u1...)
-echo "Payment sent!" # NOPE!
-
-# ✅ CORRECT - Verify payment settled
-result=$(npx @didcid/keymaster lightning-pay lnbc10u1...)
-hash=$(echo "$result" | jq -r .paymentHash)
-status=$(npx @didcid/keymaster lightning-check "$hash" | jq -r .paid)
-
-if [ "$status" = "true" ]; then
-  echo "✅ Payment confirmed"
-else
-  echo "❌ Payment failed or pending"
-  exit 1
-fi
-```
-
-This pattern prevents:
-- False confirmation (thinking you paid when you didn't)
-- Double payments (retrying when payment actually succeeded)
-- Lost funds (overpaying due to confusion)
+The script verifies the payment settled and outputs a clear success/failure message. No manual checking needed.
 
 ### Lightning Address
 

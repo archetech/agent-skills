@@ -11,5 +11,12 @@ source ~/.archon.env
 result=$(npx @didcid/keymaster lightning-pay "$@")
 hash=$(echo "$result" | jq -r .paymentHash)
 
-# Verify payment settled and return combined result
-npx @didcid/keymaster lightning-check "$hash" "${2:-}"
+# Verify payment settled
+status=$(npx @didcid/keymaster lightning-check "$hash" "${2:-}" | jq -r .paid)
+
+if [ "$status" = "true" ]; then
+  echo "✅ Payment confirmed"
+else
+  echo "❌ Payment failed or pending"
+  exit 1
+fi

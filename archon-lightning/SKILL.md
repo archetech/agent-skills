@@ -211,7 +211,16 @@ Send sats to a Lightning Address, DID, or alias.
 ./scripts/lightning/lightning-zap.sh alice 2000 "Coffee"
 ```
 
-**Returns:** Payment result (includes payment hash, verify with `lightning-check`)
+**Output:** Success or failure message with exit code
+
+**Example:**
+```bash
+./scripts/lightning/lightning-zap.sh user@getalby.com 1000 "Great post!"
+# ✅ Payment confirmed
+# (exits 0 on success, 1 on failure)
+```
+
+The script automatically verifies the payment settled before outputting success.
 
 **What it does:**
 1. Resolves Lightning Address to LNURL endpoint
@@ -337,10 +346,9 @@ fi
 ```bash
 # Zap creator via Lightning Address
 ./scripts/lightning/lightning-zap.sh creator@getalby.com 5000 "Love your content!"
+# ✅ Payment confirmed
 
-# Zap returns payment hash, verify it
-HASH=$(./scripts/lightning/lightning-zap.sh creator@getalby.com 5000 | jq -r .paymentHash)
-./scripts/lightning/lightning-check.sh "$HASH"
+# Payment verification is automatic - no manual checking needed
 ```
 
 ### Example 3: Invoice Verification

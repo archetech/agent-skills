@@ -73,9 +73,10 @@ Payment verification is built-in - the script automatically verifies before outp
 
 ```bash
 ./scripts/lightning/lightning-zap.sh user@getalby.com 1000 "Great post!"
+# ✅ Payment confirmed
 ```
 
-Send to Lightning Addresses, DIDs, or aliases - all in one command.
+Send to Lightning Addresses, DIDs, or aliases - all in one command. Payment verification is automatic.
 
 ### Payment History
 

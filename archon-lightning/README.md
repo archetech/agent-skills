@@ -264,20 +264,6 @@ All scripts wrap the [@didcid/keymaster](https://github.com/archetech/archon/tre
 - Banks (no traditional finance involved)
 - Payment processors (direct payments)
 
-## Comparison to Other Systems
-
-| Feature | archon-lightning | Custodial Wallet | Credit Card | Bank Wire |
-|---------|------------------|------------------|-------------|-----------|
-| **Setup time** | Instant | Email signup | Weeks | Days |
-| **Permission** | None | Email/phone | Credit check | Bank account |
-| **Custody** | Self | Third party | Third party | Third party |
-| **Fees** | ~0.1% | 0-3% | 2-3% | $15-50 |
-| **Settlement** | Instant | Instant-24h | 2-3 days | 1-5 days |
-| **Minimum** | 1 sat (~$0.0001) | Varies | ~$1 | ~$10 |
-| **Agent-friendly** | Yes | Maybe | No | No |
-| **Global** | Yes | Restrictions | Restricted | Restricted |
-| **Privacy** | High | Low | None | None |
-
 ## Roadmap
 
 **Current capabilities:**

@@ -262,11 +262,14 @@ Add your Lightning endpoint to your DID document.
 
 # Your DID document now includes:
 # {
-#   "id": "did:cid:bagaaiera...",
-#   "service": [{
-#     "type": "LightningNode",
-#     "serviceEndpoint": "..."
-#   }]
+#   "didDocument": {
+#     "id": "did:cid:bagaaiera...",
+#     "service": [{
+#       "id": "did:cid:bagaaiera...#lightning",
+#       "type": "Lightning",
+#       "serviceEndpoint": "http://...onion:4222/invoice/bagaaiera..."
+#     }]
+#   }
 # }
 ```
 
